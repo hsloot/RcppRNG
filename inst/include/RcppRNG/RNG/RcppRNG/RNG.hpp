@@ -2,16 +2,24 @@
 #define RCPPRNG_RNG_RCPPRNG_HPP
 
 #include <RcppRNG/RNG/RNG.hpp>
+#include <RcppRNG/misc/ObjectCounter.hpp>
 
 namespace RcppRNG {
 
-class RcppRNG : public RNG {
+class RcppRNG : public RNG, private ObjectCounter<RcppRNG> {
 public:
   RcppRNG();
   ~RcppRNG();
 private:
   static int rngSynchronizationSuspended;
 };
+
+#ifndef RCPPRNG_RCPPRNG_TOTAL
+#define RCPPRNG_RCPPRNG_TOTAL
+template<>
+size_t ObjectCounter<RcppRNG>::totalObjects_ = 0;
+#endif // RCPPRNG_RCPPRNG_TOTAL
+
 
 RcppRNG::RcppRNG() {
   if (0 == this->rngSynchronizationSuspended++)

@@ -7,42 +7,24 @@
 #include <xoshiro.h>
 #include <R_randgen.h>
 #include <convert_seed.h>
+#include <RcppRNG/misc/ObjectCounter.hpp>
 
 
 namespace RcppRNG {
 
-// see https://stackoverflow.com/a/185848/11109217
-// TODO: Move into separate file and also use it for
-// the other RNG classes.
-template<class Obj>
-class CountedObj {
-public:
-  CountedObj() {++total_;}
-  CountedObj(const CountedObj& obj) {if(this != &obj) ++total_;}
-  ~CountedObj() {--total_;}
-
-  static size_t OustandingObjects() {return total_;}
-
-private:
-  static size_t total_;
-};
-
-
-class DQRNG : public RNG, private CountedObj<DQRNG> {
+class DQRNG : public RNG, private ObjectCounter<DQRNG> {
 public:
   DQRNG();
   ~DQRNG();
 
   static dqrng::rng64_t shared_rng;
-private:
-  static size_t total_;
 };
 
-#ifndef RCPPRNG_TOTAL
-#define RCPPRNG_TOTAL
+#ifndef RCPPRNG_DQRNG_TOTAL
+#define RCPPRNG_DQRNG_TOTAL
 template<>
-size_t CountedObj<DQRNG>::total_ = 0;
-#endif
+size_t ObjectCounter<DQRNG>::totalObjects_ = 0;
+#endif // RCPPRNG_DQRNG_TOTAL
 
 DQRNG::DQRNG() {
   if (this->OustandingObjects() == 1) {
@@ -54,7 +36,7 @@ DQRNG::DQRNG() {
 
 DQRNG::~DQRNG() {
   if (this->OustandingObjects() == 1) {
-    PutRNGstate();
+    // no call to PutRNGstate() required?!
   }
 }
 

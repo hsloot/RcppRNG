@@ -2,72 +2,92 @@
 #include <RcppRNG.hpp>
 using namespace Rcpp;
 
-//' \code{rexp} implementations in Rcpp for benchmarking
-//'
-//' These functions serve no real purpose except demonstrating
-//' how to use the RNG Generators and providing some functions
-//' for benchmarks.
-//'
-//' @inheritParams stats::rexp
-//'
-//' @name rexp-Rcpp
+namespace {
+RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();
+}
 
-
-//' @rdname rexp-Rcpp
+//' Set the seed for the DQRNG
 //'
+//' Original in \url{https://github.com/daqana/dqrng/blob/master/src/dqrng.cpp}
+//'
+//' @inheritParams dqrng::dqset.seed
+//'
+//' @seealso \code{\link[dqrng]{dqset.seed}}
 //' @export
 // [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rexp1(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
-  double scale = 1. / rate;
-  RcppRNG::RcppRNG rng;
-  for (R_xlen_t k=0; k<n; k++)
-    out[k] = R::exp_rand() * scale;
-
-  return out;
+void dqset_seed(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
+  uint64_t _seed = dqrng::convert_seed<uint64_t>(seed);
+  if (stream.isNotNull()) {
+    uint64_t _stream = dqrng::convert_seed<uint64_t>(stream.as());
+    shared_dqrng.shared_rng->seed(_seed, _stream);
+  } else {
+    shared_dqrng.shared_rng->seed(_seed);
+  }
 }
 
-//' @rdname rexp-Rcpp
+//' Choose RNGkind for DQRNG
 //'
+//' Original in \url{https://github.com/daqana/dqrng/blob/master/src/dqrng.cpp}
+//'
+//' @inheritParams dqrng::dqRNGkind
+//'
+//' @seealso \code{\link[dqrng]{dqRNGkind}}
+//'
+//' @export
+// [[Rcpp::export(rng = false)]]
+void dqRNGkind(std::string kind, const std::string& normal_kind = "ignored") {
+  for (auto & c: kind)
+    c = std::tolower(c);
+  uint64_t seed = shared_dqrng.shared_rng->operator()();
+  if (kind == "default") {
+    shared_dqrng.shared_rng =  dqrng::generator(seed);
+  } else if (kind == "xoroshiro128+") {
+    shared_dqrng.shared_rng =  dqrng::generator<dqrng::xoroshiro128plus>(seed);
+  } else if (kind == "xoshiro256+") {
+    shared_dqrng.shared_rng =  dqrng::generator<dqrng::xoshiro256plus>(seed);
+  } else if (kind == "pcg64") {
+    shared_dqrng.shared_rng =  dqrng::generator<pcg64>(seed);
+  } else if (kind == "threefry") {
+    shared_dqrng.shared_rng =  dqrng::generator<sitmo::threefry_20_64>(seed);
+  } else {
+    Rcpp::stop("Unknown random generator kind: %s", kind);
+  }
+}
+
+//' Alternatives for \code{rexp}
+//'
+//' @param n Number of samples
+//' @param rate Rate parameter
+//'
+//' @name rexp-alternative
 //' @export
 // [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rexp2(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
-  RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(rate);
-  for (R_xlen_t k=0; k<n; k++)
-    out[k] = gen();
-
-  return out;
-}
-
-//' @rdname rexp-Rcpp
-//'
-//' @export
-// [[Rcpp::export(rng=true)]]
-NumericVector Rcpp_rexp3(R_xlen_t n, double rate = 1.) {
-  return rexp(n, rate);
-}
-
-//' @rdname rexp-Rcpp
-//'
-//' @export
-// [[Rcpp::export(rng=true)]]
-NumericVector Rcpp_rexp4(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
-  for (R_xlen_t k=0; k<n; k++)
-    out[k] = rexp(1, rate)[0];
-  return out;
-}
-
-//' @rdname rexp-Rcpp
-//'
-//' @export
-// [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rexp5(R_xlen_t n, double rate = 1.) {
+NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
   RcppRNG::ExpGenerator<Rcpp::RNGScope> gen(rate);
-  for (R_xlen_t k=0; k<n; k++)
-    out[k] = gen();
+  std::generate(out.begin(), out.end(), gen);
+
+  return out;
+}
+
+//' @rdname rexp-alternative
+//' @export
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rexp_RCPPRNG(R_xlen_t n, double rate = 1.) {
+  NumericVector out(no_init(n));
+  RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(rate);
+  std::generate(out.begin(), out.end(), gen);
+
+  return out;
+}
+
+//' @rdname rexp-alternative
+//' @export
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
+  NumericVector out(no_init(n));
+  RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(rate);
+  std::generate(out.begin(), out.end(), gen);
 
   return out;
 }

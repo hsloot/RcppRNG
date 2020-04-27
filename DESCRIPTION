@@ -13,6 +13,8 @@ Description:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+  R (>= 3.0.2)
 Imports: 
     Rcpp
 Roxygen: list(markdown = TRUE)
@@ -21,4 +23,9 @@ LinkingTo:
     Rcpp,
     BH (>= 1.64.0-1), 
     sitmo (>= 2.0.0),
+    dqrng
+Suggests: 
+    testthat,
+    assertthat,
+    rlang,
     dqrng

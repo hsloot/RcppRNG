@@ -140,8 +140,6 @@ bench::mark(
 ```
 
 
-
-
 However, we can also use another random number generator (e.g. the one from `dqrng`):
 
 ```{Rcpp}
@@ -196,6 +194,92 @@ bench::mark(
   check=FALSE
 )
 ```
+
+
+
+The main benefit of this design is that it allows us to implement new sampling 
+algorithms, which are based on basic generators (e.g. exp, unif, ...) such that
+they can be used with the base R RNG or other RNG's (e.g. dqrng's): 
+
+```{Rcpp,eval=FALSE}
+// example.hpp
+#include <Rcpp.h>
+#include <RcppRNG.hpp>
+
+using namespace Rcpp;
+
+template<typename T>
+class ErlangGenerator : public Generator<T, double> {
+public:
+  ErlangGenerator();
+  ErlangGenerator(int shape = 1, double rate = 1.);
+
+  inline double operator()() const;
+private:
+  int shape_;
+  double rate_;
+  const T rng;
+};
+
+template<typename T>
+ErlangGenerator<T>::ErlangGenerator() :
+  scale_(1.) {}
+
+template<typename T>
+ErlangGenerator<T>::ErlangGenerator(int shape, double rate) :
+  shape_(shape), rate_(rate) {}
+
+template<typename T>
+inline double ErlangGenerator<T>::operator()() const {
+  double out = 0.;
+  ExpGenerator<T> exp(rate);
+  for (int j=1; j<=shape; j++)
+    out += exp();
+  
+  return out;
+} 
+```
+
+
+```{Rcpp,eval=FALSE}
+// example.cpp
+#include <Rcpp.h>
+
+// [[Rcpp::depends(RcppRNG)]]
+// [[Rcpp::depends(dqrng)]]
+// [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(sitmo)]]
+
+#include <RcppRNG.hpp>
+#include "example.hpp"
+
+using namespace Rcpp;
+
+//' @export
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
+  NumericVector out(no_init(n));
+  ErlangGenerator<RcppRNG::RcppRNG> gen(shape, rate);
+  std::generate(out.begin(), out.end(), gen); 
+
+  return out;
+}
+
+//' @export
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
+  NumericVector out(no_init(n));
+  ErlangGenerator<RcppRNG::DQRNG> gen(shape, rate);
+  std::generate(out.begin(), out.end(), gen); 
+
+  return out;
+}
+/*** R
+Rcpp_rerlang_RcppRNG(10, 3, 0.5)
+Rcpp_rerlang_DQRNG(10, 3, 0.5)
+*/
+```
+
 
 ## License 
 
