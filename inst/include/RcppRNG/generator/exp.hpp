@@ -14,6 +14,7 @@ public:
   inline double operator()() const;
 private:
   double scale;
+  const T rng;
 }; // ExpGenerator<T, double>
 
 template<typename T>

@@ -1,12 +1,9 @@
 #ifndef RCPPRNG_RNG_RCPPRNG_HPP
 #define RCPPRNG_RNG_RCPPRNG_HPP
 
-namespace RcppRNG {
+#include <RcppRNG/RNG/RNG.hpp>
 
-class RNG {
-public:
-  virtual ~RNG() {};
-};
+namespace RcppRNG {
 
 class RcppRNG : public RNG {
 public:

@@ -36,6 +36,10 @@ similar in their performance.
 #include <Rcpp.h>
 
 // [[Rcpp::depends(RcppRNG)]]
+// [[Rcpp::depends(dqrng)]]
+// [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(sitmo)]]
+
 #include <RcppRNG.hpp>
 
 using namespace Rcpp;
@@ -86,9 +90,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.05ms   5.13ms      195.        NA     2.41
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.34ms   3.91ms      240.        NA     2.07
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.37ms   3.95ms      255.        NA     4.17
+#> 1 rexp(1e+05, 0.5)                 4.44ms   4.94ms      200.        NA     2.02
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.32ms    3.8ms      269.        NA     2.04
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.29ms   3.77ms      279.        NA     4.13
 ```
 
 ## Why is that useful?
@@ -138,10 +142,78 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 4.71ms   5.06ms      111.        NA     0   
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.33ms   3.88ms      269.        NA     4.20
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.37ms   3.96ms      264.        NA     4.16
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.54ms   8.82ms      107.        NA    72.9
+#> 1 rexp(1e+05, 0.5)                 4.43ms   4.67ms      212.        NA     2.04
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.32ms   3.35ms      291.        NA     4.12
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.29ms   3.32ms      293.        NA     4.10
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.71ms   7.86ms      122.        NA    84.1
+```
+
+However, we can also use another random number generator (e.g. the one
+from `dqrng`):
+
+``` cpp
+#include <Rcpp.h>
+
+// [[Rcpp::depends(RcppRNG)]]
+// [[Rcpp::depends(dqrng)]]
+// [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(sitmo)]]
+
+#include <RcppRNG.hpp>
+
+using namespace Rcpp;
+
+RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();  
+
+// [[Rcpp::export(rng=false)]]
+void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
+  uint64_t _seed = dqrng::convert_seed<uint64_t>(seed);
+  if (stream.isNotNull()) {
+    uint64_t _stream = dqrng::convert_seed<uint64_t>(stream.as());
+    shared_dqrng.shared_rng->seed(_seed, _stream);
+  } else {
+    shared_dqrng.shared_rng->seed(_seed);
+  }
+}
+
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
+  NumericVector out(no_init(n));
+  RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(rate);
+  std::generate(out.begin(), out.end(), gen);
+
+  return out;
+}
+```
+
+``` r
+dqset_seed2(use_seed)
+Rcpp_rexp_DQRNG(1e1, 0.5) 
+#>  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144
+#>  [8] 2.2395507 0.6990022 0.1845893
+
+dqset_seed2(use_seed)
+Rcpp_rexp_DQRNG(1e1, 0.5)
+#>  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144
+#>  [8] 2.2395507 0.6990022 0.1845893
+
+
+bench::mark(
+  rexp(1e5, 0.5),
+  Rcpp_rexp_RNGScope(1e5, 0.5),
+  Rcpp_rexp_RcppRNG(1e5, 0.5),
+  Rcpp_rexp_DQRNG(1e5, 0.5),
+  Rcpp_rexp_slow(1e5, 0.5),
+  check=FALSE
+)
+#> # A tibble: 5 x 6
+#>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 rexp(1e+05, 0.5)                 4.43ms   4.68ms      213.        NA     2.03
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.32ms   3.36ms      285.        NA     6.29
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.28ms   3.32ms      289.        NA     4.22
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    552.43µs 575.96µs     1592.        NA    24.6 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       7.65ms   7.75ms      126.        NA    89.6
 ```
 
 ## License
