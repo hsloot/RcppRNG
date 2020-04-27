@@ -10,8 +10,6 @@ class RcppRNG : public RNG, private ObjectCounter<RcppRNG> {
 public:
   RcppRNG();
   ~RcppRNG();
-private:
-  static int rngSynchronizationSuspended;
 };
 
 #ifndef RCPPRNG_RCPPRNG_TOTAL
@@ -22,16 +20,14 @@ size_t ObjectCounter<RcppRNG>::totalObjects_ = 0;
 
 
 RcppRNG::RcppRNG() {
-  if (0 == this->rngSynchronizationSuspended++)
+  if (1 == this->OustandingObjects())
     GetRNGstate();
 }
 
 RcppRNG::~RcppRNG() {
-  if (0 == --this->rngSynchronizationSuspended)
+  if (1 == this->OustandingObjects())
     PutRNGstate();
 }
-
-int RcppRNG::rngSynchronizationSuspended = 0;
 
 } // RcppRNG
 
