@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 # RcppRNG
 
 <!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/hsloot/RcppRNG/branch/master/graph/badge.svg)](https://codecov.io/gh/hsloot/RcppRNG?branch=master)
+[![R build status](https://github.com/hsloot/RcppRNG/workflows/R-CMD-check/badge.svg)](https://github.com/hsloot/RcppRNG/actions)
 <!-- badges: end -->
 
 The goal of RcppRNG is to explore a templated implementation of Rcpp's internal 

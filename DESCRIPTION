@@ -28,4 +28,5 @@ Suggests:
     testthat,
     assertthat,
     rlang,
-    dqrng
+    dqrng,
+    covr
