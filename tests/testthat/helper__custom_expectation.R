@@ -27,6 +27,7 @@ expect_equal_sampling_result <- function(object, expected, arguments, n,
   if (!dqrng_flag)
     set.seed(use_seed)
   else {
+    stopifnot(requireNamespace("dqrng", quietly = TRUE))
     RcppRNG::dqset_seed(use_seed)
     dqrng::dqset.seed(use_seed)
   }

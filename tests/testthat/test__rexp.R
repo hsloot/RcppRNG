@@ -37,6 +37,9 @@ test_that("rexp with RcppRNG is equivalent to stats::rexp", {
 
 
 test_that("rexp with DQRNG is equivalent to dqrng::rexp", {
+  skip_if_not_installed("dqrng")
+  dqRNGkind("default")
+  dqrng::dqRNGkind("default")
   args <- list("rate" = 0.5)
   n <- 1e5
   expect_equal_sampling_result(Rcpp_rexp_DQRNG, dqrng::dqrexp,
