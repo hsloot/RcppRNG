@@ -27,7 +27,7 @@ size_t ObjectCounter<DQRNG>::totalObjects_ = 0;
 #endif // RCPPRNG_DQRNG_TOTAL
 
 DQRNG::DQRNG() {
-  if (this->OustandingObjects() == 1) {
+  if (this->OutstandingObjects() == 1) {
     GetRNGstate();
     Rcpp::IntegerVector seed(2, dqrng::R_random_int);
     shared_rng = dqrng::generator(dqrng::convert_seed<uint64_t>(seed));
@@ -35,7 +35,7 @@ DQRNG::DQRNG() {
 }
 
 DQRNG::~DQRNG() {
-  if (this->OustandingObjects() == 1) {
+  if (this->OutstandingObjects() == 1) {
     // no call to PutRNGstate() required?!
   }
 }

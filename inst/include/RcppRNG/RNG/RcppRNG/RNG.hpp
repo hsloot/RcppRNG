@@ -20,12 +20,12 @@ size_t ObjectCounter<RcppRNG>::totalObjects_ = 0;
 
 
 RcppRNG::RcppRNG() {
-  if (1 == this->OustandingObjects())
+  if (1 == this->OutstandingObjects())
     GetRNGstate();
 }
 
 RcppRNG::~RcppRNG() {
-  if (1 == this->OustandingObjects())
+  if (1 == this->OutstandingObjects())
     PutRNGstate();
 }
 
