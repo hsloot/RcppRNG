@@ -1,7 +1,6 @@
 on:
   push:
-    path:
-      - README.Rmd
+    branches: master
 
 name: Render README
 
@@ -32,9 +31,9 @@ jobs:
           remotes::install_cran("rmarkdown")
         shell: Rscript {0}
       - name: Install RcppRNG
-        run: Rscript -e 'remotes::install_local()'
+        run: Rscript -e 'remotes::install_local(dependencies=TRUE, upgrade="always", force=TRUE, quiet=TRUE, build=TRUE, build_manual=FALSE, build_vignettes=FALSE)'
       - name: Render README
-        run: Rscript -e 'rmarkdown::render("README.Rmd")'
+        run: Rscript -e 'rmarkdown::render("README.Rmd", output_format = "md_document")'
       - name: Commit results
         run: |
           git commit README.md -m 'Re-build README.Rmd' || echo "No changes to commit"
