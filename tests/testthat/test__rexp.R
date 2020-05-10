@@ -2,7 +2,7 @@ context("rexp")
 
 setup({
   # make sure that default RNGkind is used
-  if (require_R_version("3.6.0")){
+  if (require_R_version("3.6.0")) {
     RNGkind(kind="default", normal.kind="default", sample.kind="default")
   } else {
     RNGkind(kind="default", normal.kind="default")
