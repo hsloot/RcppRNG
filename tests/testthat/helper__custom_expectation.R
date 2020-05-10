@@ -3,13 +3,14 @@ format_args <- function(args, ...) {
 }
 
 expect_equal_sampling_result <- function(object, expected, arguments, n,
-                                         use_seed = 1623L, dqrng_flag = FALSE, ...) {
+  use_seed = 1623L, dqrng_flag = FALSE, ...) {
   act <- testthat::quasi_label(rlang::enquo(object), NULL, arg = "object")
   exp <- testthat::quasi_label(rlang::enquo(expected), NULL, arg = "expected")
-  args <- testthat::quasi_label(rlang::enquo(arguments), "Arguments", arg = "arguments")
+  args <- testthat::quasi_label(rlang::enquo(arguments), "Arguments",
+    arg = "arguments")
 
   assertthat::assert_that(rlang::is_closure(act$val), rlang::is_closure(exp$val),
-                          missing(n) || assertthat::is.count(n), assertthat::is.count(use_seed))
+    missing(n) || assertthat::is.count(n), assertthat::is.count(use_seed))
 
   if (!missing(n)) {
     arg_list <- c("n" = n, args$val)
