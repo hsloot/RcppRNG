@@ -20,8 +20,8 @@ private:
   const DQRNG rng;
 }; // ExpGenerator<T, double>
 
-ExpGenerator<DQRNG>::ExpGenerator() :
-  ExpGenerator(1.) {}
+ExpGenerator<DQRNG>::ExpGenerator() : // nocov start
+  ExpGenerator(1.) {} // nocov end
 
 ExpGenerator<DQRNG>::ExpGenerator(double rate) {
   using parm_t = decltype(exp)::param_type;
