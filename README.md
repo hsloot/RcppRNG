@@ -5,10 +5,11 @@
 
 <!-- badges: start -->
 
-[![Codecov test
-coverage](https://codecov.io/gh/hsloot/RcppRNG/branch/master/graph/badge.svg)](https://codecov.io/gh/hsloot/RcppRNG?branch=master)
 [![R build
 status](https://github.com/hsloot/RcppRNG/workflows/R-CMD-check/badge.svg)](https://github.com/hsloot/RcppRNG/actions)
+[![Codecov test
+coverage](https://codecov.io/gh/hsloot/RcppRNG/branch/master/graph/badge.svg)](https://codecov.io/gh/hsloot/RcppRNG?branch=master)
+![lint](https://github.com/hsloot/RcppRNG/workflows/lint/badge.svg)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
@@ -97,9 +98,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.41ms      6ms      165.  783.79KB     2.07
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.35ms      226.    4.52MB     2.05
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.91ms   4.64ms      210.  787.92KB     4.25
+#> 1 rexp(1e+05, 0.5)                 5.42ms   6.33ms      152.  783.79KB     2.05
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.42ms      218.    4.52MB     2.05
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.02ms   5.81ms      167.  787.92KB     4.24
 ```
 
 ## Why is that useful?
@@ -149,10 +150,10 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.49ms   6.16ms     158.      784KB     2.06
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.88ms   5.13ms     190.      791KB     2.04
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.86ms   4.79ms     203.      784KB     4.31
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.24ms  10.78ms      90.4     784KB    36.8
+#> 1 rexp(1e+05, 0.5)                 5.75ms   6.78ms     144.      784KB     2.05
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.95ms   4.53ms     207.      791KB     2.07
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.32ms     226.      784KB     4.22
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.62ms  10.18ms      98.2     784KB    40.6
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -217,11 +218,11 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.42ms   6.31ms      154.     784KB     2.05
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.81ms   4.35ms      223.     791KB     4.18
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.35ms   6.13ms      148.     784KB     2.11
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    837.23µs   1.19ms      822.     781KB    13.8 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.17ms    8.4ms      116.     784KB    51.2
+#> 1 rexp(1e+05, 0.5)                 5.45ms   6.58ms     148.      784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.89ms     199.      791KB     4.28
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.86ms   4.55ms     207.      784KB     2.05
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    833.11µs   1.26ms     749.      781KB    13.8 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.34ms   9.64ms      98.2     784KB    42.6
 ```
 
 The main benefit of this design is that it allows us to implement new
