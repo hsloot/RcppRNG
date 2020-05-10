@@ -98,9 +98,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.42ms   6.33ms      152.  783.79KB     2.05
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.42ms      218.    4.52MB     2.05
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.02ms   5.81ms      167.  787.92KB     4.24
+#> 1 rexp(1e+05, 0.5)                 5.43ms      6ms      164.  783.79KB     2.05
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.36ms      224.    4.52MB     2.07
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.87ms   4.35ms      223.  787.92KB     4.21
 ```
 
 ## Why is that useful?
@@ -150,10 +150,10 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.75ms   6.78ms     144.      784KB     2.05
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.95ms   4.53ms     207.      791KB     2.07
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.32ms     226.      784KB     4.22
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.62ms  10.18ms      98.2     784KB    40.6
+#> 1 rexp(1e+05, 0.5)                 5.45ms   5.96ms      163.     784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.81ms   4.32ms      226.     791KB     4.22
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.32ms      228.     784KB     2.04
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.22ms   8.92ms      102.     784KB    45.7
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -218,11 +218,11 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.45ms   6.58ms     148.      784KB     2.06
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.89ms     199.      791KB     4.28
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.86ms   4.55ms     207.      784KB     2.05
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    833.11µs   1.26ms     749.      781KB    13.8 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.34ms   9.64ms      98.2     784KB    42.6
+#> 1 rexp(1e+05, 0.5)                 5.38ms   5.96ms      164.     784KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.29ms      222.     791KB     4.19
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.87ms   4.31ms      226.     784KB     4.19
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    847.32µs   1.19ms      825.     781KB    16.2 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.18ms   8.91ms      112.     784KB    50.7
 ```
 
 The main benefit of this design is that it allows us to implement new
