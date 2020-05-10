@@ -16,7 +16,8 @@ LazyData: true
 Depends:
   R (>= 3.0.2)
 Imports: 
-    Rcpp
+    Rcpp,
+    lifecycle
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 LinkingTo: 
@@ -30,3 +31,4 @@ Suggests:
     rlang,
     dqrng,
     covr
+RdMacros: lifecycle

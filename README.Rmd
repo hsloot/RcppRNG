@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Codecov test coverage](https://codecov.io/gh/hsloot/RcppRNG/branch/master/graph/badge.svg)](https://codecov.io/gh/hsloot/RcppRNG?branch=master)
 [![R build status](https://github.com/hsloot/RcppRNG/workflows/R-CMD-check/badge.svg)](https://github.com/hsloot/RcppRNG/actions)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
 The goal of RcppRNG is to explore a templated implementation of Rcpp's internal 
@@ -30,7 +31,7 @@ one can easily switch to an alternative RNG (e.g. `dqrng`).
 Warning: This package is currently only indented as a showcase. If you want to
 replicate the benchmarks in this package, you can install it via 
 
-``` r
+```{r, eval=FALSE}
 remotes::install_github("hsloot/RcppRNG")
 ```
 
@@ -46,6 +47,7 @@ Both version seem to be very similar in their performance.
 ```{Rcpp}
 #include <Rcpp.h>
 
+// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppRNG)]]
 // [[Rcpp::depends(dqrng)]]
 // [[Rcpp::depends(BH)]]
@@ -147,6 +149,7 @@ However, we can also use another random number generator (e.g. the one from `dqr
 ```{Rcpp}
 #include <Rcpp.h>
 
+// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppRNG)]]
 // [[Rcpp::depends(dqrng)]]
 // [[Rcpp::depends(BH)]]
@@ -206,6 +209,13 @@ they can be used with the base R RNG or other RNG's (e.g. dqrng's):
 ```{Rcpp,eval=FALSE}
 // example.hpp
 #include <Rcpp.h>
+
+// [[Rcpp::plugins("cpp11")]]
+// [[Rcpp::depends(RcppRNG)]]
+// [[Rcpp::depends(dqrng)]]
+// [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(sitmo)]]
+
 #include <RcppRNG.hpp>
 
 using namespace Rcpp;
@@ -247,6 +257,7 @@ inline double ErlangGenerator<T>::operator()() const {
 // example.cpp
 #include <Rcpp.h>
 
+// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppRNG)]]
 // [[Rcpp::depends(dqrng)]]
 // [[Rcpp::depends(BH)]]

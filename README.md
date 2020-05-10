@@ -5,13 +5,19 @@
 
 <!-- badges: start -->
 
+[![Codecov test
+coverage](https://codecov.io/gh/hsloot/RcppRNG/branch/master/graph/badge.svg)](https://codecov.io/gh/hsloot/RcppRNG?branch=master)
+[![R build
+status](https://github.com/hsloot/RcppRNG/workflows/R-CMD-check/badge.svg)](https://github.com/hsloot/RcppRNG/actions)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
 The goal of RcppRNG is to explore a templated implementation of Rcpp’s
 internal generators for sampling. The motivation is to be able to write
 sampling routines that are based on native sampling routines (`rexp`,
 `runif`, …) in a way that one can easily switch to an alternative RNG
-(e.g. `dqrng`).
+(e.g. `dqrng`).
 
 ## Installation
 
@@ -35,6 +41,7 @@ similar in their performance.
 ``` cpp
 #include <Rcpp.h>
 
+// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppRNG)]]
 // [[Rcpp::depends(dqrng)]]
 // [[Rcpp::depends(BH)]]
@@ -90,9 +97,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 4.43ms   4.95ms      208.        NA     2.02
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.31ms   3.73ms      270.        NA     2.04
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.29ms   3.65ms      281.        NA     4.13
+#> 1 rexp(1e+05, 0.5)                 5.41ms      6ms      165.  783.79KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.35ms      226.    4.52MB     2.05
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.91ms   4.64ms      210.  787.92KB     4.25
 ```
 
 ## Why is that useful?
@@ -142,10 +149,10 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 4.43ms   4.67ms      213.        NA     2.05
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.32ms   3.34ms      294.        NA     4.08
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.28ms   3.31ms      297.        NA     4.09
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       6.72ms    6.9ms      138.        NA   102.
+#> 1 rexp(1e+05, 0.5)                 5.49ms   6.16ms     158.      784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.88ms   5.13ms     190.      791KB     2.04
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.86ms   4.79ms     203.      784KB     4.31
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.24ms  10.78ms      90.4     784KB    36.8
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -154,6 +161,7 @@ from `dqrng`):
 ``` cpp
 #include <Rcpp.h>
 
+// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppRNG)]]
 // [[Rcpp::depends(dqrng)]]
 // [[Rcpp::depends(BH)]]
@@ -209,11 +217,11 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 4.41ms   4.67ms      216.        NA     2.08
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)    3.3ms   3.35ms      290.        NA     4.09
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.29ms   3.31ms      294.        NA     4.09
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    550.11µs 569.03µs     1600.        NA    23.7 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       6.84ms   6.93ms      139.        NA    97.5
+#> 1 rexp(1e+05, 0.5)                 5.42ms   6.31ms      154.     784KB     2.05
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.81ms   4.35ms      223.     791KB     4.18
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.35ms   6.13ms      148.     784KB     2.11
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    837.23µs   1.19ms      822.     781KB    13.8 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.17ms    8.4ms      116.     784KB    51.2
 ```
 
 The main benefit of this design is that it allows us to implement new
@@ -224,6 +232,13 @@ unif, …) such that they can be used with the base R RNG or other RNG’s
 ``` cpp
 // example.hpp
 #include <Rcpp.h>
+
+// [[Rcpp::plugins("cpp11")]]
+// [[Rcpp::depends(RcppRNG)]]
+// [[Rcpp::depends(dqrng)]]
+// [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(sitmo)]]
+
 #include <RcppRNG.hpp>
 
 using namespace Rcpp;
@@ -264,6 +279,7 @@ inline double ErlangGenerator<T>::operator()() const {
 // example.cpp
 #include <Rcpp.h>
 
+// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppRNG)]]
 // [[Rcpp::depends(dqrng)]]
 // [[Rcpp::depends(BH)]]
