@@ -42,10 +42,7 @@ similar in their performance.
 #include <Rcpp.h>
 
 // [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG)]]
-// [[Rcpp::depends(dqrng)]]
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::depends(sitmo)]]
+// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
 #include <RcppRNG.hpp>
 
@@ -90,16 +87,16 @@ Rcpp_rexp_RcppRNG(10, 0.5)
 
 bench::mark(
   rexp(1e5, 0.5),
-  Rcpp_rexp_RNGScope(1e5, 0.5), 
-  Rcpp_rexp_RcppRNG(1e5, 0.5), 
+  Rcpp_rexp_RNGScope(1e5, 0.5),
+  Rcpp_rexp_RcppRNG(1e5, 0.5),
   check=FALSE
 )
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.43ms   5.96ms      163.  783.79KB     2.06
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.42ms      223.    4.52MB     2.07
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.87ms   4.41ms      224.  787.92KB     4.23
+#> 1 rexp(1e+05, 0.5)                 5.77ms   6.74ms      146.  783.79KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.88ms      5ms      195.    4.52MB     2.08
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.36ms   5.92ms      101.  787.92KB     2.10
 ```
 
 ## Why is that useful?
@@ -131,7 +128,7 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 NumericVector Rcpp_rexp_slow(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  for (R_xlen_t k=0; k<n; k++) 
+  for (R_xlen_t k=0; k<n; k++)
     out[k] = rexp(1, rate)[0];
 
   return out;
@@ -141,18 +138,18 @@ NumericVector Rcpp_rexp_slow(R_xlen_t n, double rate = 1.) {
 ``` r
 bench::mark(
   rexp(1e5, 0.5),
-  Rcpp_rexp_RNGScope(1e5, 0.5), 
-  Rcpp_rexp_RcppRNG(1e5, 0.5), 
+  Rcpp_rexp_RNGScope(1e5, 0.5),
+  Rcpp_rexp_RcppRNG(1e5, 0.5),
   Rcpp_rexp_slow(1e5, 0.5),
   check=FALSE
 )
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.41ms   5.96ms     164.      784KB     2.05
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.86ms   4.38ms     222.      791KB     4.22
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.84ms   4.41ms     218.      784KB     2.05
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.13ms   9.64ms      97.5     784KB    40.4
+#> 1 rexp(1e+05, 0.5)                  5.4ms   6.03ms     159.      784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.75ms     209.      791KB     2.05
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.86ms   4.73ms     200.      784KB     4.22
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)      10.02ms  11.99ms      80.0     784KB    33.3
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -162,16 +159,13 @@ from `dqrng`):
 #include <Rcpp.h>
 
 // [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG)]]
-// [[Rcpp::depends(dqrng)]]
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::depends(sitmo)]]
+// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
 #include <RcppRNG.hpp>
 
 using namespace Rcpp;
 
-RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();  
+RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();
 
 // [[Rcpp::export(rng=false)]]
 void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
@@ -196,7 +190,7 @@ NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
 
 ``` r
 dqset_seed2(use_seed)
-Rcpp_rexp_DQRNG(1e1, 0.5) 
+Rcpp_rexp_DQRNG(1e1, 0.5)
 #>  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144
 #>  [8] 2.2395507 0.6990022 0.1845893
 
@@ -217,11 +211,11 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.43ms   6.02ms      161.     784KB     2.04
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.98ms   4.78ms      203.     791KB     4.23
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.98ms   4.74ms      201.     784KB     2.05
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    836.98µs   1.19ms      830.     781KB    16.6 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.21ms   9.02ms      110.     784KB    46.6
+#> 1 rexp(1e+05, 0.5)                 5.42ms   6.08ms      161.     784KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.66ms      208.     791KB     4.20
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.36ms      224.     784KB     2.04
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    841.73µs    1.2ms      798.     781KB    13.6 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.28ms   9.15ms      106.     784KB    48.0
 ```
 
 The main benefit of this design is that it allows us to implement new
@@ -234,10 +228,7 @@ unif, …) such that they can be used with the base R RNG or other RNG’s
 #include <Rcpp.h>
 
 // [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG)]]
-// [[Rcpp::depends(dqrng)]]
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::depends(sitmo)]]
+// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
 #include <RcppRNG.hpp>
 
@@ -270,9 +261,9 @@ inline double ErlangGenerator<T>::operator()() const {
   ExpGenerator<T> exp(rate);
   for (int j=1; j<=shape; j++)
     out += exp();
-  
+
   return out;
-} 
+}
 ```
 
 ``` cpp
@@ -280,10 +271,7 @@ inline double ErlangGenerator<T>::operator()() const {
 #include <Rcpp.h>
 
 // [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG)]]
-// [[Rcpp::depends(dqrng)]]
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::depends(sitmo)]]
+// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
 #include <RcppRNG.hpp>
 #include "example.hpp"
@@ -295,7 +283,7 @@ using namespace Rcpp;
 NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
   NumericVector out(no_init(n));
   ErlangGenerator<RcppRNG::RcppRNG> gen(shape, rate);
-  std::generate(out.begin(), out.end(), gen); 
+  std::generate(out.begin(), out.end(), gen);
 
   return out;
 }
@@ -305,7 +293,7 @@ NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) 
 NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
   NumericVector out(no_init(n));
   ErlangGenerator<RcppRNG::DQRNG> gen(shape, rate);
-  std::generate(out.begin(), out.end(), gen); 
+  std::generate(out.begin(), out.end(), gen);
 
   return out;
 }
