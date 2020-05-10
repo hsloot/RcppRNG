@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - master
+    path:
+      - README.Rmd
 
 name: Render README
 
@@ -32,9 +32,7 @@ jobs:
           remotes::install_cran("rmarkdown")
         shell: Rscript {0}
       - name: Install RcppRNG
-        run: |
-          remotes::install_local()
-        shell: Rscript {0}
+        run: Rscript -e 'remotes::install_local()'
       - name: Render README
         run: Rscript -e 'rmarkdown::render("README.Rmd")'
       - name: Commit results
