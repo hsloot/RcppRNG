@@ -2,8 +2,13 @@ context("rexp")
 
 setup({
   # make sure that default RNGkind is used
-  RNGkind(kind="default", normal.kind="default", sample.kind="default")
-  if(requireNamespace("dqrng", quietly=TRUE)) {
+  if (require_R_version("3.6.0")){
+    RNGkind(kind="default", normal.kind="default", sample.kind="default")
+  } else {
+    RNGkind(kind="default", normal.kind="default")
+  }
+
+  if (requireNamespace("dqrng", quietly=TRUE)) {
     dqRNGkind("default")
     dqrng::dqRNGkind("default")
   }

@@ -12,7 +12,7 @@ test_that("Default generator: setting seed produces identical uniformly distribu
   expect_equal(u1, u2)
 })
 
-test_that("Default generator: setting seed and stream produces identical uniformly distributed numbers", {
+test_that("Default generator: setting seed and stream produces identical uniformly distributed numbers", { # nolint
   dqRNGkind("default")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)
@@ -21,7 +21,7 @@ test_that("Default generator: setting seed and stream produces identical uniform
   expect_equal(u1, u2)
 })
 
-test_that("Default generator: setting same seed but different stream produces different uniformly distributed numbers", {
+test_that("Default generator: setting same seed but different stream produces different uniformly distributed numbers", { # nolint
   dqRNGkind("default")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)
@@ -48,7 +48,7 @@ test_that("PCG64: setting seed and stream produces identical uniformly distribut
   expect_equal(u1, u2)
 })
 
-test_that("PCG64: setting same seed but different stream produces different uniformly distributed numbers", {
+test_that("PCG64: setting same seed but different stream produces different uniformly distributed numbers", { # nolint
   dqRNGkind("pcg64")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)
@@ -66,7 +66,7 @@ test_that("Xoroshiro128: setting seed produces identical uniformly distributed n
   expect_equal(u1, u2)
 })
 
-test_that("Xoroshiro128: setting seed and stream produces identical uniformly distributed numbers", {
+test_that("Xoroshiro128: setting seed and stream produces identical uniformly distributed numbers", { # nolint
   dqRNGkind("Xoroshiro128+")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)
@@ -75,7 +75,7 @@ test_that("Xoroshiro128: setting seed and stream produces identical uniformly di
   expect_equal(u1, u2)
 })
 
-test_that("Xoroshiro128: setting same seed but different stream produces different uniformly distributed numbers", {
+test_that("Xoroshiro128: setting same seed but different stream produces different uniformly distributed numbers", { # nolint
   dqRNGkind("Xoroshiro128+")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)
@@ -102,7 +102,7 @@ test_that("Xoshiro256: setting seed and stream produces identical uniformly dist
   expect_equal(u1, u2)
 })
 
-test_that("Xoshiro256: setting same seed but different stream produces different uniformly distributed numbers", {
+test_that("Xoshiro256: setting same seed but different stream produces different uniformly distributed numbers", { # nolint
   dqRNGkind("Xoshiro256+")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)
@@ -129,7 +129,7 @@ test_that("Threefry: setting seed and stream produces identical uniformly distri
   expect_equal(u1, u2)
 })
 
-test_that("Threefry: setting same seed but different stream produces different uniformly distributed numbers", {
+test_that("Threefry: setting same seed but different stream produces different uniformly distributed numbers", { # nolint
   dqRNGkind("Threefry")
   dqset_seed(seed, 1)
   u1 <- Rcpp_rexp_DQRNG(10)

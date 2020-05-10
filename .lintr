@@ -1,5 +1,5 @@
 linters: with_defaults(
-  line_length_linter(120),
+  line_length_linter(100),
   infix_spaces_linter = NULL,
   dummy_linter = NULL
   )
