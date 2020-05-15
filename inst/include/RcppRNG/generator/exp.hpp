@@ -13,17 +13,17 @@ public:
 
   inline double operator()() const;
 private:
-  double scale;
-  const T rng;
+  double scale_;
+  const T rng_;
 }; // ExpGenerator<T, double>
 
 template<typename T>
 ExpGenerator<T>::ExpGenerator() :
-  scale(1.) {}
+  scale_(1.) {}
 
 template<typename T>
 ExpGenerator<T>::ExpGenerator(double rate) :
-  scale(1. / rate) {}
+  scale_(1. / rate) {}
 
 } // RcppRNG
 

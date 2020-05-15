@@ -9,7 +9,7 @@ namespace RcppRNG {
 
 template<>
 inline double ExpGenerator<RcppRNG>::operator()() const {
-  return R::exp_rand() * scale;
+  return R::exp_rand() * scale_;
 }
 
 }

@@ -7,11 +7,11 @@ template<typename T, typename S>
 class Generator {
 public:
   Generator() {}
-  ~Generator() {}
+  virtual ~Generator() {}
 
   virtual inline S operator()() const = 0;
 private:
-  const T rng;
+  const T rng_;
 }; // Generator<T, S>
 
 } // RcppRNG

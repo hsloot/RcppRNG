@@ -16,20 +16,20 @@ public:
 
   inline double operator()() const;
 private:
-  dqrng::exponential_distribution exp;
-  const DQRNG rng;
+  dqrng::exponential_distribution exp_;
+  const DQRNG rng_;
 }; // ExpGenerator<T, double>
 
 ExpGenerator<DQRNG>::ExpGenerator() : // # nocov start
   ExpGenerator(1.) {} // # nocov end
 
 ExpGenerator<DQRNG>::ExpGenerator(double rate) {
-  using parm_t = decltype(exp)::param_type;
-  exp.param(parm_t(rate));
+  using parm_t = decltype(exp_)::param_type;
+  exp_.param(parm_t(rate));
 }
 
 inline double ExpGenerator<DQRNG>::operator()() const {
-  return exp(*rng.shared_rng);
+  return exp_(*rng_.shared_rng);
 }
 
 } // RcppRNG
