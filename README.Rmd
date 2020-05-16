@@ -57,7 +57,8 @@ using namespace Rcpp;
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpGenerator<RNGScope> gen(rate);
+  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpGenerator<RNGScope> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
   return out;
@@ -66,7 +67,8 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(rate);
+  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
   return out;
@@ -169,7 +171,8 @@ void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> s
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(rate);
+  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
   return out;
@@ -211,32 +214,37 @@ they can be used with the base R RNG or other RNG's (e.g. dqrng's):
 
 using namespace Rcpp;
 
-template<typename T>
-class ErlangGenerator : public Generator<T, double> {
+class ErlangDistribution : public UnivariateDistribution {
 public:
-  ErlangGenerator();
-  ErlangGenerator(int shape = 1, double rate = 1.);
-
-  inline double operator()() const;
+  ErlangDistribution() :
+      shape_(1), rate_(1.) {}
+  ErlangDistribution(int shape, double rate) :
+      shape_(shape), rate_(rate) {}
+  
+  int shape() const;
+  double rate() const;
 private:
   int shape_;
   double rate_;
-  const T rng;
 };
 
-template<typename T>
-ErlangGenerator<T>::ErlangGenerator() :
-  scale_(1.) {}
+int ErlangDistribution::shape() const {
+  return shape_;
+}
+
+double ErlangDistribution::rate() const {
+  return rate_;
+}
 
 template<typename T>
-ErlangGenerator<T>::ErlangGenerator(int shape, double rate) :
-  shape_(shape), rate_(rate) {}
+using ErlangGenerator = Generator<T, double, ErlangDistribution>;
 
 template<typename T>
 inline double ErlangGenerator<T>::operator()() const {
   double out = 0.;
-  ExpGenerator<T> exp(rate);
-  for (int j=1; j<=shape; j++)
+  ExpDistribution param(param_.rate());
+  ExpGenerator<T> exp(param);
+  for (int j=1; j<=param_.shape(); j++)
     out += exp();
 
   return out;
@@ -260,7 +268,8 @@ using namespace Rcpp;
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
   NumericVector out(no_init(n));
-  ErlangGenerator<RcppRNG::RcppRNG> gen(shape, rate);
+  ErlangDistribution param(shape, rate);
+  ErlangGenerator<RcppRNG::RcppRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
   return out;
@@ -270,7 +279,8 @@ NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) 
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
   NumericVector out(no_init(n));
-  ErlangGenerator<RcppRNG::DQRNG> gen(shape, rate);
+  ErlangDistribution param(shape, rate);
+  ErlangGenerator<RcppRNG::DQRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
   return out;

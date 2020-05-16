@@ -3,15 +3,18 @@
 
 namespace RcppRNG {
 
-template<typename T, typename S>
+template<typename T, typename S, typename U>
 class Generator {
 public:
   Generator() {}
-  virtual ~Generator() {}
+  Generator(const U &param) :
+      param_(param) {}
+  ~Generator() {}
 
-  virtual inline S operator()() const = 0;
+  inline S operator()() const;
 private:
   const T rng_;
+  const U param_;
 }; // Generator<T, S>
 
 } // RcppRNG

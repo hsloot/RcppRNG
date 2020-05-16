@@ -5,6 +5,9 @@
 #include <RcppRNG/RNG/RcppRNG/RNG.hpp>
 #include <RcppRNG/RNG/DQRNG/RNG.hpp>
 
+#include <RcppRNG/distribution/distribution.hpp>
+#include <RcppRNG/distribution/exp.hpp>
+
 #include <RcppRNG/generator/generator.hpp>
 #include <RcppRNG/generator/exp.hpp>
 #include <RcppRNG/RNG/RcppRNG/exp.hpp>

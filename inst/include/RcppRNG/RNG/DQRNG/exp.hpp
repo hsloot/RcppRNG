@@ -3,29 +3,36 @@
 
 #include <Rcpp.h>
 #include <RcppRNG/RNG/DQRNG/RNG.hpp>
+#include <RcppRNG/distribution/exp.hpp>
 #include <RcppRNG/generator/exp.hpp>
 #include <dqrng_distribution.h>
 
 namespace RcppRNG {
 
 template<>
-class ExpGenerator<DQRNG> : public Generator<DQRNG, double> {
+class Generator<DQRNG, double, ExpDistribution> {
 public:
-  ExpGenerator();
-  ExpGenerator(double rate = 1.);
+  Generator();
+  Generator(const ExpDistribution &param);
+
+  virtual ~Generator() {}
 
   inline double operator()() const;
 private:
+  ExpDistribution param_;
   dqrng::exponential_distribution exp_;
   const DQRNG rng_;
-}; // ExpGenerator<T, double>
+}; // Generator<DQRNG, double, ExpDistribution>
 
-ExpGenerator<DQRNG>::ExpGenerator() : // # nocov start
-  ExpGenerator(1.) {} // # nocov end
-
-ExpGenerator<DQRNG>::ExpGenerator(double rate) {
+ExpGenerator<DQRNG>::Generator() {
   using parm_t = decltype(exp_)::param_type;
-  exp_.param(parm_t(rate));
+  exp_.param(parm_t(param_.rate()));
+}
+
+ExpGenerator<DQRNG>::Generator(const ExpDistribution &param) :
+    param_(param) {
+  using parm_t = decltype(exp_)::param_type;
+  exp_.param(parm_t(param_.rate()));
 }
 
 inline double ExpGenerator<DQRNG>::operator()() const {
