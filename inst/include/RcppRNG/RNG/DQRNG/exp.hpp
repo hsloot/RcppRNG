@@ -10,16 +10,16 @@
 namespace RcppRNG {
 
 template<>
-class Generator<DQRNG, double, ExpDistribution> {
+class Generator<DQRNG, double, ExpDistribution<double>> {
 public:
   Generator();
-  Generator(const ExpDistribution &param);
+  Generator(const ExpDistribution<double> &param);
 
   virtual ~Generator() {}
 
   inline double operator()() const;
 private:
-  ExpDistribution param_;
+  ExpDistribution<double> param_;
   dqrng::exponential_distribution exp_;
   const DQRNG rng_;
 }; // Generator<DQRNG, double, ExpDistribution>
@@ -29,7 +29,7 @@ ExpGenerator<DQRNG>::Generator() {
   exp_.param(parm_t(param_.rate()));
 }
 
-ExpGenerator<DQRNG>::Generator(const ExpDistribution &param) :
+ExpGenerator<DQRNG>::Generator(const ExpDistribution<double> &param) :
     param_(param) {
   using parm_t = decltype(exp_)::param_type;
   exp_.param(parm_t(param_.rate()));
