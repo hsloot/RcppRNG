@@ -34,7 +34,7 @@ At the moment, only a templated version of the generator for the
 exponential function is implemented. The generator template allows
 variations for difference RNG classes (which are essentially assumed to
 behave like `Rcpp::RNGScope`). I implemented my own version of
-`Rcpp::RNGScope` in `RcppRNG::RcppRNG` which contains it’s own static
+`Rcpp::RNGScope` with `RcppRNG::RcppRNG` which contains it’s own static
 counter instead going through R’s Call API. Both version seem to be very
 similar in their performance.
 
@@ -51,7 +51,7 @@ using namespace Rcpp;
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution<double> param(rate);
+  RcppRNG::ExpDistribution param(rate);
   RcppRNG::ExpGenerator<RNGScope> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -61,7 +61,7 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution<double> param(rate);
+  RcppRNG::ExpDistribution param(rate);
   RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -96,9 +96,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 6.22ms   7.36ms      134.  783.79KB     2.05
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.86ms   5.12ms      194.    4.52MB     2.09
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.18ms   4.72ms      208.  787.92KB     2.06
+#> 1 rexp(1e+05, 0.5)                 5.65ms   6.57ms      149.  783.79KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.58ms      214.    4.52MB     2.06
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.82ms      195.  787.92KB     4.29
 ```
 
 ## Why is that useful?
@@ -148,10 +148,10 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                    6ms   7.15ms     133.      784KB     2.08
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   4.24ms   5.11ms     190.      786KB     2.07
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.21ms    5.2ms     192.      784KB     4.22
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.37ms  10.03ms      93.6     784KB    41.6
+#> 1 rexp(1e+05, 0.5)                 5.47ms   6.08ms      157.     784KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.61ms      205.     786KB     2.05
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.32ms      227.     784KB     4.24
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.12ms    8.9ms      105.     784KB    45.7
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -183,7 +183,7 @@ void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> s
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution<double> param(rate);
+  RcppRNG::ExpDistribution param(rate);
   RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -214,107 +214,18 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.84ms   7.44ms     128.      784KB     2.10
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms    4.7ms     209.      786KB     2.05
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.89ms   4.62ms     209.      784KB     4.22
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    873.17µs   1.42ms     692.      781KB    14.1 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.24ms   9.67ms      99.7     784KB    41.8
+#> 1 rexp(1e+05, 0.5)                 5.42ms   5.95ms      163.     784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.63ms      208.     786KB     4.29
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.89ms   4.34ms      224.     784KB     4.26
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    872.37µs   1.21ms      825.     781KB    14.1 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.13ms   8.76ms      109.     784KB    46.4
 ```
 
 The main benefit of this design is that it allows us to implement new
 sampling algorithms, which are based on basic generators (e.g. exp,
 unif, …) such that they can be used with the base R RNG or other RNG’s
-(e.g. dqrng’s):
-
-``` cpp
-// example.hpp
-#include <Rcpp.h>
-
-// [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
-
-#include <RcppRNG.hpp>
-
-using namespace Rcpp;
-
-template<typename RealType>
-class ErlangDistribution : public UnivariateDistribution<RealType> {
-public:
-  ErlangDistribution() :
-      shape_(1), rate_(1.) {}
-  ErlangDistribution(int shape, RealType rate) :
-      shape_(shape), rate_(rate) {}
-
-  int shape() const;
-  RealType rate() const;
-private:
-  int shape_;
-  RealType rate_;
-};
-
-template<typename RealType>
-int ErlangDistribution<RealType>::shape() const {
-  return shape_;
-}
-
-template<typename RealType>
-RealType ErlangDistribution<RealType>::rate() const {
-  return rate_;
-}
-
-template<typename T>
-using ErlangGenerator = Generator<T, double, ErlangDistribution<double>>;
-
-template<typename T>
-inline double ErlangGenerator<T>::operator()() const {
-  double out = 0.;
-  ExpDistribution<double> param(param_.rate());
-  ExpGenerator<T> exp(param);
-  for (int j=1; j<=param_.shape(); j++)
-    out += exp();
-
-  return out;
-}
-```
-
-``` cpp
-// example.cpp
-#include <Rcpp.h>
-
-// [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
-
-#include <RcppRNG.hpp>
-#include "example.hpp"
-
-using namespace Rcpp;
-
-//' @export
-// [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
-  NumericVector out(no_init(n));
-  ErlangDistribution<double> param(shape, rate);
-  ErlangGenerator<RcppRNG::RcppRNG> gen(param);
-  std::generate(out.begin(), out.end(), gen);
-
-  return out;
-}
-
-//' @export
-// [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
-  NumericVector out(no_init(n));
-  ErlangDistribution<double> param(shape, rate);
-  ErlangGenerator<RcppRNG::DQRNG> gen(param);
-  std::generate(out.begin(), out.end(), gen);
-
-  return out;
-}
-/*** R
-Rcpp_rerlang_RcppRNG(10, 3, 0.5)
-Rcpp_rerlang_DQRNG(10, 3, 0.5)
-*/
-```
+(e.g. dqrng’s). An example is described in a [create new
+generators](articles/create-new-generators.html).
 
 ## License
 

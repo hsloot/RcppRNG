@@ -1,0 +1,151 @@
+---
+title: "Create new generators"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Create new generators}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+set.seed(1623L)
+RcppRNG::dqset_seed(1623L)
+```
+
+```{Rcpp, ref.label=knitr::all_rcpp_labels(), include=FALSE}
+```
+
+## Summary
+
+This document describes how you can extend `RcppRNG` with your own generator classes for random 
+numbers. 
+
+As an example, we will create an implementation of a generator for the Erlang distribution, see [https://en.wikipedia.org/wiki/Erlang_distribution](https://en.wikipedia.org/wiki/Erlang_distribution). 
+Let \( k \in \mathbb{N} \) and \( \lambda > 0 \). The \( \mathrm{Erlang}{(k, \lambda)} \) distribution
+has the stochastic representation 
+\[
+  \sum_{j=1}^{k} E_j ,
+\]
+where \( E_1, \ldots, E_k \) are iid exponentially distributed with rate \( \lambda \). 
+
+
+## Setup 
+
+First, you have to tell `Rcpp` that you are using `c++11` and that your code links to the 
+packages `RcppRNG` (for obvious reasons) as well as `dqrng`, `BH`, and `sitmo` (to use the RNG from 
+`dqrng`). 
+
+```{Rcpp Erlang-setup, eval=FALSE}
+#include <Rcpp.h>
+// [[Rcpp::plugins("cpp11")]]
+// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
+
+#include <RcppRNG.hpp>
+```
+
+
+## Implementation
+
+### The distribution
+
+```{Rcpp Erlang-distribution, eval=FALSE}
+namespace RcppRNG {
+class ErlangDistribution : public UnivariateDistribution {
+public:
+  ErlangDistribution() :
+      shape_(1), rate_(1.) {}
+  ErlangDistribution(int shape, double rate) :
+      shape_(shape), rate_(rate) {}
+  
+  int shape() const;
+  double rate() const;
+private:
+  int shape_;
+  double rate_;
+}; // ErlangDistribution
+
+int ErlangDistribution::shape() const {
+  return shape_;
+}
+
+double ErlangDistribution::rate() const {
+  return rate_;
+}
+} // RcppRNG
+```
+
+### The generator
+
+```{Rcpp Erlang-generator, eval=FALSE}
+namespace RcppRNG {
+template<typename T>
+class ErlangGenerator : public Generator<T, double, ErlangDistribution> { 
+public:
+  ErlangGenerator();
+  ErlangGenerator(const ErlangDistribution& param);
+  
+  inline double operator()() const;
+private:
+  ErlangDistribution param_;
+  ExpGenerator<T> exp_generator_;
+}; // ErlangGenerator
+
+template<typename T>
+ErlangGenerator<T>::ErlangGenerator() : 
+    param_(), exp_generator_(ExpGenerator<T>(ExpDistribution(1. / param_.rate()))) {
+}
+
+template<typename T>
+ErlangGenerator<T>::ErlangGenerator(const ErlangDistribution& param) : 
+    param_(param), exp_generator_(ExpGenerator<T>(ExpDistribution(1. / param_.rate()))) {}
+
+template<typename T>
+inline double ErlangGenerator<T>::operator()() const {
+  double out = 0.;
+  for (int j=1; j<=param_.shape(); j++)
+    out += exp_generator_();
+
+  return out;
+}
+} // RcppRNG
+```
+
+### `Rcpp`-wrapper
+
+```{Rcpp drop-in-functions, eval=FALSE}
+using namespace Rcpp;
+
+//' @export
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
+  NumericVector out(no_init(n));
+  RcppRNG::ErlangDistribution param(shape, rate);
+  RcppRNG::ErlangGenerator<RcppRNG::RcppRNG> gen(param);
+  std::generate(out.begin(), out.end(), gen);
+
+  return out;
+}
+
+//' @export
+// [[Rcpp::export(rng=false)]]
+NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
+  NumericVector out(no_init(n));
+  RcppRNG::ErlangDistribution param(shape, rate);
+  RcppRNG::ErlangGenerator<RcppRNG::DQRNG> gen(param);
+  std::generate(out.begin(), out.end(), gen);
+
+  return out;
+}
+```
+
+## Test 
+
+```{r test-Erlang-generator}
+Rcpp_rerlang_RcppRNG(10, 3, 0.5)
+Rcpp_rerlang_DQRNG(10, 3, 0.5)
+```
+

@@ -9,3 +9,4 @@
 ^pkgdown$
 ^\.lintr$
 ^\.editorconfig$
+^vignettes/create-new-generators\.Rmd$
