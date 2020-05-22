@@ -10,8 +10,12 @@ template<typename T>
 class ObjectCounter {
 public:
   ObjectCounter();
-  ObjectCounter(const ObjectCounter& obj);
+  ObjectCounter(const ObjectCounter& other);
+  ObjectCounter(ObjectCounter&& other) = default; //move constructor
   ~ObjectCounter();
+
+  ObjectCounter& operator = (const ObjectCounter &other);
+  ObjectCounter& operator=(ObjectCounter&& other) = default;
 
   static size_t OutstandingObjects();
 
@@ -25,14 +29,19 @@ ObjectCounter<T>::ObjectCounter() {
 }
 
 template<typename T>
-ObjectCounter<T>::ObjectCounter(const ObjectCounter<T>& obj) {
-  if(this != &obj)
+ObjectCounter<T>::ObjectCounter(const ObjectCounter<T>& other) {
+  if(this != &other)
     ++totalObjects_;
 }
 
 template<typename T>
 ObjectCounter<T>::~ObjectCounter() {
   --totalObjects_;
+}
+
+template<typename T>
+ObjectCounter<T>& ObjectCounter<T>::operator = (const ObjectCounter<T> &other) {
+  ++totalObjects_;
 }
 
 template<typename T>
