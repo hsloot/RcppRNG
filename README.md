@@ -34,7 +34,7 @@ At the moment, only a templated version of the generator for the
 exponential function is implemented. The generator template allows
 variations for difference RNG classes (which are essentially assumed to
 behave like `Rcpp::RNGScope`). I implemented my own version of
-`Rcpp::RNGScope` in `RcppRNG::RcppRNG` which contains it’s own static
+`Rcpp::RNGScope` with `RcppRNG::RcppRNG` which contains it’s own static
 counter instead going through R’s Call API. Both version seem to be very
 similar in their performance.
 
@@ -96,9 +96,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.43ms   6.15ms      155.  783.79KB     2.07
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.38ms      222.    4.52MB     2.06
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.84ms   4.56ms      216.  787.92KB     4.27
+#> 1 rexp(1e+05, 0.5)                 5.65ms   6.57ms      149.  783.79KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.58ms      214.    4.52MB     2.06
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.82ms      195.  787.92KB     4.29
 ```
 
 ## Why is that useful?
@@ -148,10 +148,10 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.77ms   6.52ms     151.      784KB     2.07
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.93ms   4.74ms     201.      786KB     2.05
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.84ms   4.36ms     223.      784KB     4.25
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.26ms   9.51ms      99.2     784KB    41.1
+#> 1 rexp(1e+05, 0.5)                 5.47ms   6.08ms      157.     784KB     2.07
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.61ms      205.     786KB     2.05
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.32ms      227.     784KB     4.24
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.12ms    8.9ms      105.     784KB    45.7
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -214,11 +214,11 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.41ms   6.36ms      151.     784KB     2.04
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.75ms      204.     786KB     4.25
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.32ms      223.     784KB     4.24
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    843.88µs   1.21ms      808.     781KB    13.8 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.32ms   9.53ms      102.     784KB    46.2
+#> 1 rexp(1e+05, 0.5)                 5.42ms   5.95ms      163.     784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.63ms      208.     786KB     4.29
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.89ms   4.34ms      224.     784KB     4.26
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    872.37µs   1.21ms      825.     781KB    14.1 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.13ms   8.76ms      109.     784KB    46.4
 ```
 
 The main benefit of this design is that it allows us to implement new

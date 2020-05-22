@@ -40,7 +40,7 @@ remotes::install_github("hsloot/RcppRNG")
 At the moment, only a templated version of the generator for the exponential
 function is implemented. The generator template allows variations for difference
 RNG classes (which are essentially assumed to behave like `Rcpp::RNGScope`).
-I implemented my own version of `Rcpp::RNGScope` in `RcppRNG::RcppRNG` which
+I implemented my own version of `Rcpp::RNGScope` with `RcppRNG::RcppRNG` which
 contains it's own static counter instead going through R's Call API.
 Both version seem to be very similar in their performance.
 
@@ -142,7 +142,6 @@ bench::mark(
 )
 ```
 
-
 However, we can also use another random number generator (e.g. the one from `dqrng`):
 
 ```{Rcpp}
@@ -196,8 +195,6 @@ bench::mark(
   check=FALSE
 )
 ```
-
-
 
 The main benefit of this design is that it allows us to implement new sampling
 algorithms, which are based on basic generators (e.g. exp, unif, ...) such that
