@@ -21,7 +21,7 @@ RcppRNG::dqset_seed(1623L)
 
 ## Summary
 
-This document describes how you can extend `RcppRNG` with your own `Generator`-classes for random 
+This document describes how you can extend `RcppRNG` with your own generator classes for random 
 numbers. 
 
 As an example, we will create an implementation of a generator for the Erlang distribution, see [https://en.wikipedia.org/wiki/Erlang_distribution](https://en.wikipedia.org/wiki/Erlang_distribution). 
@@ -35,7 +35,7 @@ where \( E_1, \ldots, E_k \) are iid exponentially distributed with rate \( \lam
 
 ## Setup 
 
-First, we have to tell `Rcpp` that we are using `c++11` and that our code depends links to the 
+First, you have to tell `Rcpp` that you are using `c++11` and that your code links to the 
 packages `RcppRNG` (for obvious reasons) as well as `dqrng`, `BH`, and `sitmo` (to use the RNG from 
 `dqrng`). 
 
