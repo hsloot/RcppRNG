@@ -40,7 +40,7 @@ remotes::install_github("hsloot/RcppRNG")
 At the moment, only a templated version of the generator for the exponential
 function is implemented. The generator template allows variations for difference
 RNG classes (which are essentially assumed to behave like `Rcpp::RNGScope`).
-I implemented my own version of `Rcpp::RNGScope` in `RcppRNG::RcppRNG` which
+I implemented my own version of `Rcpp::RNGScope` with `RcppRNG::RcppRNG` which
 contains it's own static counter instead going through R's Call API.
 Both version seem to be very similar in their performance.
 
@@ -142,7 +142,6 @@ bench::mark(
 )
 ```
 
-
 However, we can also use another random number generator (e.g. the one from `dqrng`):
 
 ```{Rcpp}
@@ -197,99 +196,10 @@ bench::mark(
 )
 ```
 
-
-
 The main benefit of this design is that it allows us to implement new sampling
 algorithms, which are based on basic generators (e.g. exp, unif, ...) such that
-they can be used with the base R RNG or other RNG's (e.g. dqrng's):
-
-```{Rcpp,eval=FALSE}
-// example.hpp
-#include <Rcpp.h>
-
-// [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
-
-#include <RcppRNG.hpp>
-
-using namespace Rcpp;
-
-class ErlangDistribution : public UnivariateDistribution {
-public:
-  ErlangDistribution() :
-      shape_(1), rate_(1.) {}
-  ErlangDistribution(int shape, double rate) :
-      shape_(shape), rate_(rate) {}
-  
-  int shape() const;
-  double rate() const;
-private:
-  int shape_;
-  double rate_;
-};
-
-int ErlangDistribution::shape() const {
-  return shape_;
-}
-
-double ErlangDistribution::rate() const {
-  return rate_;
-}
-
-template<typename T>
-using ErlangGenerator = Generator<T, double, ErlangDistribution>;
-
-template<typename T>
-inline double ErlangGenerator<T>::operator()() const {
-  double out = 0.;
-  ExpDistribution param(param_.rate());
-  ExpGenerator<T> exp(param);
-  for (int j=1; j<=param_.shape(); j++)
-    out += exp();
-
-  return out;
-}
-```
-
-
-```{Rcpp,eval=FALSE}
-// example.cpp
-#include <Rcpp.h>
-
-// [[Rcpp::plugins("cpp11")]]
-// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
-
-#include <RcppRNG.hpp>
-#include "example.hpp"
-
-using namespace Rcpp;
-
-//' @export
-// [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
-  NumericVector out(no_init(n));
-  ErlangDistribution param(shape, rate);
-  ErlangGenerator<RcppRNG::RcppRNG> gen(param);
-  std::generate(out.begin(), out.end(), gen);
-
-  return out;
-}
-
-//' @export
-// [[Rcpp::export(rng=false)]]
-NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
-  NumericVector out(no_init(n));
-  ErlangDistribution param(shape, rate);
-  ErlangGenerator<RcppRNG::DQRNG> gen(param);
-  std::generate(out.begin(), out.end(), gen);
-
-  return out;
-}
-/*** R
-Rcpp_rerlang_RcppRNG(10, 3, 0.5)
-Rcpp_rerlang_DQRNG(10, 3, 0.5)
-*/
-```
+they can be used with the base R RNG or other RNG's (e.g. dqrng's). An example 
+is described in a [create new generators](articles/create-new-generators.html).
 
 
 ## License
