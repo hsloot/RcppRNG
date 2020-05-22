@@ -18,7 +18,7 @@ public:
   ~DQRNG();
 
   static dqrng::rng64_t shared_rng;
-};
+}; // DQRNG
 
 #ifndef RCPPRNG_DQRNG_TOTAL
 #define RCPPRNG_DQRNG_TOTAL

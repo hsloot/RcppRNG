@@ -10,7 +10,7 @@ class RcppRNG : public RNG, private ObjectCounter<RcppRNG> {
 public:
   RcppRNG();
   ~RcppRNG();
-};
+}; // RcppRNG
 
 #ifndef RCPPRNG_RCPPRNG_TOTAL
 #define RCPPRNG_RCPPRNG_TOTAL

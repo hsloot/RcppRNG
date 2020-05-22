@@ -51,7 +51,7 @@ using namespace Rcpp;
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RNGScope> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -61,7 +61,7 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -96,9 +96,9 @@ bench::mark(
 #> # A tibble: 3 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.65ms   6.57ms      149.  783.79KB     2.07
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.58ms      214.    4.52MB     2.06
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.82ms      195.  787.92KB     4.29
+#> 1 rexp(1e+05, 0.5)                 6.31ms    7.4ms      132.  783.79KB     2.03
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.89ms   4.83ms      204.    4.52MB     2.06
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.98ms   4.86ms      202.  787.92KB     4.21
 ```
 
 ## Why is that useful?
@@ -148,10 +148,10 @@ bench::mark(
 #> # A tibble: 4 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.47ms   6.08ms      157.     784KB     2.07
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.61ms      205.     786KB     2.05
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.32ms      227.     784KB     4.24
-#> 4 Rcpp_rexp_slow(1e+05, 0.5)       8.12ms    8.9ms      105.     784KB    45.7
+#> 1 rexp(1e+05, 0.5)                 5.52ms   6.22ms     158.      784KB     2.06
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.97ms   5.11ms     195.      786KB     2.05
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.57ms     212.      784KB     4.24
+#> 4 Rcpp_rexp_slow(1e+05, 0.5)       9.31ms  11.37ms      85.2     784KB    36.1
 ```
 
 However, we can also use another random number generator (e.g. the one
@@ -183,7 +183,7 @@ void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> s
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -214,11 +214,11 @@ bench::mark(
 #> # A tibble: 5 x 6
 #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rexp(1e+05, 0.5)                 5.42ms   5.95ms      163.     784KB     2.06
-#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.63ms      208.     786KB     4.29
-#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.89ms   4.34ms      224.     784KB     4.26
-#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    872.37µs   1.21ms      825.     781KB    14.1 
-#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.13ms   8.76ms      109.     784KB    46.4
+#> 1 rexp(1e+05, 0.5)                 5.45ms    6.1ms      160.     784KB     2.05
+#> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.79ms   4.82ms      202.     786KB     4.20
+#> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)     3.8ms   4.22ms      231.     784KB     4.20
+#> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    833.31µs   1.16ms      869.     781KB    15.8 
+#> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.14ms   8.41ms      114.     784KB    51.8
 ```
 
 The main benefit of this design is that it allows us to implement new

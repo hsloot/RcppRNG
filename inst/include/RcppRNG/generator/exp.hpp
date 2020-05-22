@@ -7,7 +7,7 @@
 namespace RcppRNG {
 
 template<typename T>
-using ExpGenerator = Generator<T, double, ExpDistribution>;
+using ExpGenerator = Generator<T, double, ExpDistribution<double>>;
 
 } // RcppRNG
 

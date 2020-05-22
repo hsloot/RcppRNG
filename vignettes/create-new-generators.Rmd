@@ -96,12 +96,12 @@ private:
 
 template<typename T>
 ErlangGenerator<T>::ErlangGenerator() : 
-    param_(), exp_generator_(ExpGenerator<T>(ExpDistribution(1. / param_.rate()))) {
+    param_(), exp_generator_(ExpGenerator<T>(ExpDistribution<double>(1. / param_.rate()))) {
 }
 
 template<typename T>
 ErlangGenerator<T>::ErlangGenerator(const ErlangDistribution& param) : 
-    param_(param), exp_generator_(ExpGenerator<T>(ExpDistribution(1. / param_.rate()))) {}
+    param_(param), exp_generator_(ExpGenerator<T>(ExpDistribution<double>(1. / param_.rate()))) {}
 
 template<typename T>
 inline double ErlangGenerator<T>::operator()() const {

@@ -64,7 +64,7 @@ void dqRNGkind(std::string kind, const std::string& normal_kind = "ignored") {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<Rcpp::RNGScope> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -76,7 +76,7 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RCPPRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -88,7 +88,7 @@ NumericVector Rcpp_rexp_RCPPRNG(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 

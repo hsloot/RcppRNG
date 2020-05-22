@@ -7,7 +7,7 @@ namespace RcppRNG {
 class RNG {
 public:
   virtual ~RNG() {};
-};
+}; // RNG
 
 } // RcppRNG
 

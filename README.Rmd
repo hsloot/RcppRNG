@@ -57,7 +57,7 @@ using namespace Rcpp;
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RNGScope> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -67,7 +67,7 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -170,7 +170,7 @@ void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> s
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution param(rate);
+  RcppRNG::ExpDistribution<double> param(rate);
   RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
   std::generate(out.begin(), out.end(), gen);
 
@@ -198,7 +198,7 @@ bench::mark(
 
 The main benefit of this design is that it allows us to implement new sampling
 algorithms, which are based on basic generators (e.g. exp, unif, ...) such that
-they can be used with the base R RNG or other RNG's (e.g. dqrng's). An example 
+they can be used with the base R RNG or other RNG's (e.g. dqrng's). An example
 is described in a [create new generators](articles/create-new-generators.html).
 
 
