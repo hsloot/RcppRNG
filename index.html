@@ -104,7 +104,7 @@
 <span id="cb2-10"><a href="#cb2-10"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
 <span id="cb2-11"><a href="#cb2-11"></a>NumericVector Rcpp_rexp_RNGScope(<span class="dt">R_xlen_t</span> n, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
 <span id="cb2-12"><a href="#cb2-12"></a>  NumericVector out(no_init(n));</span>
-<span id="cb2-13"><a href="#cb2-13"></a>  RcppRNG::ExpDistribution param(rate);</span>
+<span id="cb2-13"><a href="#cb2-13"></a>  RcppRNG::ExpDistribution&lt;<span class="dt">double</span>&gt; param(rate);</span>
 <span id="cb2-14"><a href="#cb2-14"></a>  RcppRNG::ExpGenerator&lt;RNGScope&gt; gen(param);</span>
 <span id="cb2-15"><a href="#cb2-15"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(), gen);</span>
 <span id="cb2-16"><a href="#cb2-16"></a></span>
@@ -114,7 +114,7 @@
 <span id="cb2-20"><a href="#cb2-20"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
 <span id="cb2-21"><a href="#cb2-21"></a>NumericVector Rcpp_rexp_RcppRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
 <span id="cb2-22"><a href="#cb2-22"></a>  NumericVector out(no_init(n));</span>
-<span id="cb2-23"><a href="#cb2-23"></a>  RcppRNG::ExpDistribution param(rate);</span>
+<span id="cb2-23"><a href="#cb2-23"></a>  RcppRNG::ExpDistribution&lt;<span class="dt">double</span>&gt; param(rate);</span>
 <span id="cb2-24"><a href="#cb2-24"></a>  RcppRNG::ExpGenerator&lt;RcppRNG::RcppRNG&gt; gen(param);</span>
 <span id="cb2-25"><a href="#cb2-25"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(), gen);</span>
 <span id="cb2-26"><a href="#cb2-26"></a></span>
@@ -146,9 +146,9 @@
 <span class="co">#&gt; # A tibble: 3 x 6</span>
 <span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span>
 <span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.65ms   6.57ms      149.  783.79KB     2.07</span>
-<span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.58ms      214.    4.52MB     2.06</span>
-<span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.82ms      195.  787.92KB     4.29</span></pre></div>
+<span class="co">#&gt; 1 rexp(1e+05, 0.5)                 6.31ms    7.4ms      132.  783.79KB     2.03</span>
+<span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.89ms   4.83ms      204.    4.52MB     2.06</span>
+<span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.98ms   4.86ms      202.  787.92KB     4.21</span></pre></div>
 </div>
 <div id="why-is-that-useful" class="section level2">
 <h2 class="hasAnchor">
@@ -179,10 +179,10 @@
 <span class="co">#&gt; # A tibble: 4 x 6</span>
 <span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span>
 <span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.47ms   6.08ms      157.     784KB     2.07</span>
-<span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.61ms      205.     786KB     2.05</span>
-<span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.32ms      227.     784KB     4.24</span>
-<span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       8.12ms    8.9ms      105.     784KB    45.7</span></pre></div>
+<span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.52ms   6.22ms     158.      784KB     2.06</span>
+<span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.97ms   5.11ms     195.      786KB     2.05</span>
+<span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.85ms   4.57ms     212.      784KB     4.24</span>
+<span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       9.31ms  11.37ms      85.2     784KB    36.1</span></pre></div>
 <p>However, we can also use another random number generator (e.g. the one from <code>dqrng</code>):</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1"></a><span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span></span>
 <span id="cb8-2"><a href="#cb8-2"></a></span>
@@ -209,7 +209,7 @@
 <span id="cb8-23"><a href="#cb8-23"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
 <span id="cb8-24"><a href="#cb8-24"></a>NumericVector Rcpp_rexp_DQRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
 <span id="cb8-25"><a href="#cb8-25"></a>  NumericVector out(no_init(n));</span>
-<span id="cb8-26"><a href="#cb8-26"></a>  RcppRNG::ExpDistribution param(rate);</span>
+<span id="cb8-26"><a href="#cb8-26"></a>  RcppRNG::ExpDistribution&lt;<span class="dt">double</span>&gt; param(rate);</span>
 <span id="cb8-27"><a href="#cb8-27"></a>  RcppRNG::ExpGenerator&lt;RcppRNG::DQRNG&gt; gen(param);</span>
 <span id="cb8-28"><a href="#cb8-28"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(), gen);</span>
 <span id="cb8-29"><a href="#cb8-29"></a></span>
@@ -237,11 +237,11 @@
 <span class="co">#&gt; # A tibble: 5 x 6</span>
 <span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span>
 <span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.42ms   5.95ms      163.     784KB     2.06</span>
-<span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.63ms      208.     786KB     4.29</span>
-<span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.89ms   4.34ms      224.     784KB     4.26</span>
-<span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    872.37µs   1.21ms      825.     781KB    14.1 </span>
-<span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       8.13ms   8.76ms      109.     784KB    46.4</span></pre></div>
+<span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.45ms    6.1ms      160.     784KB     2.05</span>
+<span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.79ms   4.82ms      202.     786KB     4.20</span>
+<span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)     3.8ms   4.22ms      231.     784KB     4.20</span>
+<span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    833.31µs   1.16ms      869.     781KB    15.8 </span>
+<span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       8.14ms   8.41ms      114.     784KB    51.8</span></pre></div>
 <p>The main benefit of this design is that it allows us to implement new sampling algorithms, which are based on basic generators (e.g. exp, unif, …) such that they can be used with the base R RNG or other RNG’s (e.g. dqrng’s). An example is described in a <a href="articles/create-new-generators.html">create new generators</a>.</p>
 </div>
 <div id="license" class="section level2">

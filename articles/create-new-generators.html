@@ -148,12 +148,12 @@
 <span id="cb3-13"><a href="#cb3-13"></a></span>
 <span id="cb3-14"><a href="#cb3-14"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
 <span id="cb3-15"><a href="#cb3-15"></a>ErlangGenerator&lt;T&gt;::ErlangGenerator() : </span>
-<span id="cb3-16"><a href="#cb3-16"></a>    <span class="va">param_</span>(), <span class="va">exp_generator_</span>(ExpGenerator&lt;T&gt;(ExpDistribution(<span class="fl">1.</span> / <span class="va">param_</span>.rate()))) {</span>
+<span id="cb3-16"><a href="#cb3-16"></a>    <span class="va">param_</span>(), <span class="va">exp_generator_</span>(ExpGenerator&lt;T&gt;(ExpDistribution&lt;<span class="dt">double</span>&gt;(<span class="fl">1.</span> / <span class="va">param_</span>.rate()))) {</span>
 <span id="cb3-17"><a href="#cb3-17"></a>}</span>
 <span id="cb3-18"><a href="#cb3-18"></a></span>
 <span id="cb3-19"><a href="#cb3-19"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
 <span id="cb3-20"><a href="#cb3-20"></a>ErlangGenerator&lt;T&gt;::ErlangGenerator(<span class="at">const</span> ErlangDistribution&amp; param) : </span>
-<span id="cb3-21"><a href="#cb3-21"></a>    <span class="va">param_</span>(param), <span class="va">exp_generator_</span>(ExpGenerator&lt;T&gt;(ExpDistribution(<span class="fl">1.</span> / <span class="va">param_</span>.rate()))) {}</span>
+<span id="cb3-21"><a href="#cb3-21"></a>    <span class="va">param_</span>(param), <span class="va">exp_generator_</span>(ExpGenerator&lt;T&gt;(ExpDistribution&lt;<span class="dt">double</span>&gt;(<span class="fl">1.</span> / <span class="va">param_</span>.rate()))) {}</span>
 <span id="cb3-22"><a href="#cb3-22"></a></span>
 <span id="cb3-23"><a href="#cb3-23"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
 <span id="cb3-24"><a href="#cb3-24"></a><span class="kw">inline</span> <span class="dt">double</span> ErlangGenerator&lt;T&gt;::<span class="kw">operator</span>()() <span class="at">const</span> {</span>
