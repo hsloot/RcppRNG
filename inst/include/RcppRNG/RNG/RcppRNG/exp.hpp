@@ -12,6 +12,6 @@ inline double ExpGenerator<RcppRNG>::operator()() const {
   return R::exp_rand() * param_.scale();
 }
 
-}
+} // RcppRNG
 
 #endif // RCPPRNG_RNG_RCPPRNG_EXP_HPP

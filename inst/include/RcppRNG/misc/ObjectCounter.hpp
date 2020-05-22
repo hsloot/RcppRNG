@@ -17,7 +17,7 @@ public:
 
 private:
   static size_t totalObjects_;
-};
+}; // Object Counter
 
 template<typename T>
 ObjectCounter<T>::ObjectCounter() {
@@ -40,6 +40,6 @@ size_t ObjectCounter<T>::OutstandingObjects() {
   return totalObjects_;
 }
 
-}
+} // RcppRNG
 
 #endif // RCPPRNG_MISC_OBJECTCOUNTER_HPP
