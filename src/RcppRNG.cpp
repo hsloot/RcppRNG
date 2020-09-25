@@ -15,7 +15,8 @@ RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();
 //' @seealso \code{\link[dqrng]{dqset.seed}}
 //' @export
 // [[Rcpp::export(rng=false)]]
-void dqset_seed(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
+void dqset_seed(Rcpp::IntegerVector seed,
+                Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
   uint64_t _seed = dqrng::convert_seed<uint64_t>(seed);
   if (stream.isNotNull()) {
     uint64_t _stream = dqrng::convert_seed<uint64_t>(stream.as());
@@ -36,19 +37,18 @@ void dqset_seed(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> st
 //' @export
 // [[Rcpp::export(rng = false)]]
 void dqRNGkind(std::string kind, const std::string& normal_kind = "ignored") {
-  for (auto & c: kind)
-    c = std::tolower(c);
+  for (auto& c : kind) c = std::tolower(c);
   uint64_t seed = shared_dqrng.shared_rng->operator()();
   if (kind == "default") {
-    shared_dqrng.shared_rng =  dqrng::generator(seed);
+    shared_dqrng.shared_rng = dqrng::generator(seed);
   } else if (kind == "xoroshiro128+") {
-    shared_dqrng.shared_rng =  dqrng::generator<dqrng::xoroshiro128plus>(seed);
+    shared_dqrng.shared_rng = dqrng::generator<dqrng::xoroshiro128plus>(seed);
   } else if (kind == "xoshiro256+") {
-    shared_dqrng.shared_rng =  dqrng::generator<dqrng::xoshiro256plus>(seed);
+    shared_dqrng.shared_rng = dqrng::generator<dqrng::xoshiro256plus>(seed);
   } else if (kind == "pcg64") {
-    shared_dqrng.shared_rng =  dqrng::generator<pcg64>(seed);
+    shared_dqrng.shared_rng = dqrng::generator<pcg64>(seed);
   } else if (kind == "threefry") {
-    shared_dqrng.shared_rng =  dqrng::generator<sitmo::threefry_20_64>(seed);
+    shared_dqrng.shared_rng = dqrng::generator<sitmo::threefry_20_64>(seed);
   } else {
     Rcpp::stop("Unknown random generator kind: %s", kind);
   }

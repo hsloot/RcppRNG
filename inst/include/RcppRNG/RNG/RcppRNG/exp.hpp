@@ -2,16 +2,17 @@
 #define RCPPRNG_RNG_RCPPRNG_EXP_HPP
 
 #include <Rcpp.h>
+
 #include <RcppRNG/RNG/RcppRNG/RNG.hpp>
 #include <RcppRNG/generator/exp.hpp>
 
 namespace RcppRNG {
 
-template<>
+template <>
 inline double ExpGenerator<RcppRNG>::operator()() const {
   return R::exp_rand() * param_.scale();
 }
 
-} // RcppRNG
+}  // namespace RcppRNG
 
-#endif // RCPPRNG_RNG_RCPPRNG_EXP_HPP
+#endif  // RCPPRNG_RNG_RCPPRNG_EXP_HPP

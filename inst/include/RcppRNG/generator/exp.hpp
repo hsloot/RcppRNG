@@ -6,9 +6,9 @@
 
 namespace RcppRNG {
 
-template<typename T>
+template <typename T>
 using ExpGenerator = Generator<T, double, ExpDistribution<double>>;
 
-} // RcppRNG
+}  // namespace RcppRNG
 
-#endif // RCPPRNG_GENERATOR_EXP_HPP
+#endif  // RCPPRNG_GENERATOR_EXP_HPP

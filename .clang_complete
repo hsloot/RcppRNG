@@ -1,0 +1,4 @@
+-I/usr/local/lib/R/include
+-I/usr/local/lib/R/4.0/site-library/Rcpp/include
+-I/usr/local/lib/R/4.0/site-library/dqrng/include
+-Iinst/include

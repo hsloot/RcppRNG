@@ -1,30 +1,30 @@
 #ifndef RCPPRNG_RNG_DQRNG_HPP
 #define RCPPRNG_RNG_DQRNG_HPP
 
-#include <RcppRNG/RNG/RNG.hpp>
+#include <R_randgen.h>
 #include <Rcpp.h>
+#include <convert_seed.h>
 #include <dqrng_generator.h>
 #include <xoshiro.h>
-#include <R_randgen.h>
-#include <convert_seed.h>
-#include <RcppRNG/misc/ObjectCounter.hpp>
 
+#include <RcppRNG/RNG/RNG.hpp>
+#include <RcppRNG/misc/ObjectCounter.hpp>
 
 namespace RcppRNG {
 
 class DQRNG : public RNG, private ObjectCounter<DQRNG> {
-public:
+ public:
   DQRNG();
   ~DQRNG();
 
   static dqrng::rng64_t shared_rng;
-}; // DQRNG
+};  // DQRNG
 
 #ifndef RCPPRNG_DQRNG_TOTAL
 #define RCPPRNG_DQRNG_TOTAL
-template<>
+template <>
 size_t ObjectCounter<DQRNG>::totalObjects_ = 0;
-#endif // RCPPRNG_DQRNG_TOTAL
+#endif  // RCPPRNG_DQRNG_TOTAL
 
 DQRNG::DQRNG() {
   if (this->OutstandingObjects() == 1) {
@@ -42,6 +42,6 @@ DQRNG::~DQRNG() {
 
 dqrng::rng64_t DQRNG::shared_rng;
 
-} // RcppRNG
+}  // namespace RcppRNG
 
-#endif // RCPPRNG_RNG_DQRNG_HPP
+#endif  // RCPPRNG_RNG_DQRNG_HPP

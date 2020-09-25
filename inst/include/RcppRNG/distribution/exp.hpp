@@ -1,13 +1,15 @@
 #ifndef RCPPRNG_DISTRIBUTION_EXP_HPP
 #define RCPPRNG_DISTRIBUTION_EXP_HPP
 
+#include <stdexcept>
+
 #include <RcppRNG/distribution/distribution.hpp>
 
 namespace RcppRNG {
 
-template<typename RealType = double>
+template <typename RealType = double>
 class ExpDistribution : public UnivariateDistribution {
-public:
+ public:
   ExpDistribution();
   ExpDistribution(RealType rate);
 
@@ -15,39 +17,37 @@ public:
 
   RealType rate() const;
   RealType scale() const;
-private:
+
+ private:
   inline void check_params();
   RealType scale_;
-}; // ExpDistribution
+};  // ExpDistribution
 
-template<typename RealType>
+template <typename RealType>
 inline void ExpDistribution<RealType>::check_params() {
-  if (scale_ < 0.)
-    throw std::range_error("rate has to be non-negative");
+  if (scale_ < 0.) throw std::range_error("rate has to be non-negative");
 }
 
-template<typename RealType>
-ExpDistribution<RealType>::ExpDistribution() :
-    scale_(1.) {
+template <typename RealType>
+ExpDistribution<RealType>::ExpDistribution() : scale_(1.) {
   check_params();
 }
 
-template<typename RealType>
-ExpDistribution<RealType>::ExpDistribution(RealType rate) :
-    scale_(1. / rate) {
+template <typename RealType>
+ExpDistribution<RealType>::ExpDistribution(RealType rate) : scale_(1. / rate) {
   check_params();
 }
 
-template<typename RealType>
+template <typename RealType>
 RealType ExpDistribution<RealType>::rate() const {
   return 1. / scale_;
 }
 
-template<typename RealType>
+template <typename RealType>
 RealType ExpDistribution<RealType>::scale() const {
   return scale_;
 }
 
-} // RcppRNG
+}  // namespace RcppRNG
 
-#endif // RCPPRNG_DISTRIBUTION_EXP_HPP
+#endif  // RCPPRNG_DISTRIBUTION_EXP_HPP

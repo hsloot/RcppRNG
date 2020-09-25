@@ -4,13 +4,13 @@
 namespace RcppRNG {
 
 class Distribution {
-public:
+ public:
   virtual ~Distribution() {}
-}; // Distribution
+};  // Distribution
 
 class UnivariateDistribution : public Distribution {
-}; // UnivariateDistribution
+};  // UnivariateDistribution
 
-} // RcppRNG
+}  // namespace RcppRNG
 
-#endif // RCPPRNG_DISTRIBUTION_DISTRIBUTION_HPP
+#endif  // RCPPRNG_DISTRIBUTION_DISTRIBUTION_HPP

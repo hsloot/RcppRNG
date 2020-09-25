@@ -1,7 +1,7 @@
 Package: RcppRNG
 Type: Package
 Title: Templated Rcpp random number generators
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: person("Henrik", "Sloot", email = "henrik.sloot@gmail.com",
                   role = c("aut", "cre"))
 Description: 
