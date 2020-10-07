@@ -2,8 +2,13 @@
 #include <RcppRNG.hpp>
 using namespace Rcpp;
 
+using unit_exponential_distribution =
+    RcppRNG::unit_exponential_distribution<double>;
+using exponential_distribution =
+    RcppRNG::exponential_distribution<double, unit_exponential_distribution>;
+
 namespace {
-RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();
+RcppRNG::rng::DQRNG shared_dqrng = RcppRNG::rng::DQRNG();
 }
 
 //' Set the seed for the DQRNG
@@ -64,9 +69,10 @@ void dqRNGkind(std::string kind, const std::string& normal_kind = "ignored") {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution<double> param(rate);
-  RcppRNG::ExpGenerator<Rcpp::RNGScope> gen(param);
-  std::generate(out.begin(), out.end(), gen);
+  Rcpp::RNGScope engine{};
+  exponential_distribution exp{rate};
+  std::generate(out.begin(), out.end(),
+                [&engine, &exp]() { return exp(engine); });
 
   return out;
 }
@@ -76,9 +82,10 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RCPPRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution<double> param(rate);
-  RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
-  std::generate(out.begin(), out.end(), gen);
+  RcppRNG::rng::RcppRNG engine{};
+  exponential_distribution exp{rate};
+  std::generate(out.begin(), out.end(),
+                [&engine, &exp]() { return exp(engine); });
 
   return out;
 }
@@ -88,9 +95,10 @@ NumericVector Rcpp_rexp_RCPPRNG(R_xlen_t n, double rate = 1.) {
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::ExpDistribution<double> param(rate);
-  RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
-  std::generate(out.begin(), out.end(), gen);
+  RcppRNG::rng::DQRNG engine{};
+  exponential_distribution exp{rate};
+  std::generate(out.begin(), out.end(),
+                [&engine, &exp]() { return exp(engine); });
 
   return out;
 }
