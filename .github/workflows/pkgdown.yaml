@@ -32,9 +32,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages(c("remotes", "bench", "ggplot2", "ggbeeswarm", "tidyr"))
+          install.packages(c("remotes", "ggplot2", "ggbeeswarm", "tidyr"))
           remotes::install_deps(dependencies = TRUE)
           remotes::install_dev("pkgdown")
+          remotes::install_dev("bench")
         shell: Rscript {0}
 
       - name: Install package
