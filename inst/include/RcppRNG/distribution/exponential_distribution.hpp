@@ -61,6 +61,14 @@ class exponential_distribution {
 
   // compiler generated ctor and assignment op is sufficient
 
+  param_type params() const {
+    return params_;
+  }
+
+  void params(const param_type& params) {
+    params_ = params;
+  }
+
   template <typename _EngineType>
   _RealType operator()(_EngineType&& engine) {
     return (*this)(params_.lambda(), std::forward<_EngineType>(engine));
