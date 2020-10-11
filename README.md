@@ -41,19 +41,25 @@ similar in their performance.
 
     #include <Rcpp.h>
 
-    // [[Rcpp::plugins("cpp11")]]
+    // [[Rcpp::plugins("cpp14")]]
     // [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
     #include <RcppRNG.hpp>
 
     using namespace Rcpp;
 
+    using unit_exponential_distribution =
+        RcppRNG::unit_exponential_distribution<double>;
+    using exponential_distribution =
+        RcppRNG::exponential_distribution<double, unit_exponential_distribution>;
+
     // [[Rcpp::export(rng=false)]]
     NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
       NumericVector out(no_init(n));
-      RcppRNG::ExpDistribution<double> param(rate);
-      RcppRNG::ExpGenerator<RNGScope> gen(param);
-      std::generate(out.begin(), out.end(), gen);
+      Rcpp::RNGScope engine{};
+      exponential_distribution exp{rate};
+      std::generate(out.begin(), out.end(),
+                    [&engine, &exp]() { return exp(engine); });
 
       return out;
     }
@@ -61,9 +67,10 @@ similar in their performance.
     // [[Rcpp::export(rng=false)]]
     NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
       NumericVector out(no_init(n));
-      RcppRNG::ExpDistribution<double> param(rate);
-      RcppRNG::ExpGenerator<RcppRNG::RcppRNG> gen(param);
-      std::generate(out.begin(), out.end(), gen);
+      RcppRNG::rng::RcppRNG engine{};
+      exponential_distribution exp{rate};
+      std::generate(out.begin(), out.end(),
+                    [&engine, &exp]() { return exp(engine); });
 
       return out;
     }
@@ -94,9 +101,9 @@ similar in their performance.
     #> # A tibble: 3 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.55ms   6.49ms      147.  783.79KB     2.09
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   4.02ms   5.23ms      182.    4.52MB     2.06
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.04ms    5.3ms      179.  787.92KB     2.08
+    #> 1 rexp(1e+05, 0.5)                 5.19ms   5.83ms      170.  783.79KB     2.07
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)    3.9ms   4.41ms      221.    4.52MB     2.07
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms   4.36ms      224.  787.92KB     4.23
 
 Why is that useful?
 -------------------
@@ -139,24 +146,29 @@ will be demonstrated in the following
     #> # A tibble: 4 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.83ms   7.08ms      127.     784KB     2.09
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.98ms   5.24ms      178.     786KB     2.09
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.28ms   5.29ms      181.     784KB     2.06
-    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.71ms  10.01ms      102.     784KB    40.9
+    #> 1 rexp(1e+05, 0.5)                 5.25ms   6.06ms      162.     784KB     2.05
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.87ms   4.62ms      210.     784KB     2.06
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.65ms      211.     784KB     4.26
+    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.66ms   8.97ms      106.     784KB    45.9
 
 However, we can also use another random number generator (e.g. the one
 from `dqrng`):
 
     #include <Rcpp.h>
 
-    // [[Rcpp::plugins("cpp11")]]
+    // [[Rcpp::plugins("cpp14")]]
     // [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
     #include <RcppRNG.hpp>
 
     using namespace Rcpp;
 
-    RcppRNG::DQRNG shared_dqrng = RcppRNG::DQRNG();
+    using unit_exponential_distribution =
+        RcppRNG::unit_exponential_distribution<double>;
+    using exponential_distribution =
+        RcppRNG::exponential_distribution<double, unit_exponential_distribution>;
+
+    RcppRNG::rng::DQRNG shared_dqrng = RcppRNG::rng::DQRNG();
 
     // [[Rcpp::export(rng=false)]]
     void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
@@ -172,9 +184,10 @@ from `dqrng`):
     // [[Rcpp::export(rng=false)]]
     NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
       NumericVector out(no_init(n));
-      RcppRNG::ExpDistribution<double> param(rate);
-      RcppRNG::ExpGenerator<RcppRNG::DQRNG> gen(param);
-      std::generate(out.begin(), out.end(), gen);
+      RcppRNG::rng::DQRNG engine{};
+      exponential_distribution exp{rate};
+      std::generate(out.begin(), out.end(),
+                    [&engine, &exp]() { return exp(engine); });
 
       return out;
     }
@@ -201,11 +214,11 @@ from `dqrng`):
     #> # A tibble: 5 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.29ms   6.48ms      151.     784KB     2.07
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.76ms      181.     786KB     2.06
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms    4.3ms      224.     784KB     4.19
-    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    841.58µs   1.21ms      803.     781KB    14.0 
-    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       7.52ms   8.09ms      117.     784KB    51.4
+    #> 1 rexp(1e+05, 0.5)                 5.21ms   5.85ms      168.     784KB     2.05
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.33ms      222.     784KB     4.19
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms   4.34ms      224.     784KB     4.22
+    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)       914µs   1.26ms      784.     781KB    13.7 
+    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       7.78ms   9.45ms      102.     784KB    42.8
 
 The main benefit of this design is that it allows us to implement new
 sampling algorithms, which are based on basic generators (e.g. exp,

@@ -10,3 +10,6 @@
 ^\.lintr$
 ^\.editorconfig$
 ^vignettes/create-new-generators\.Rmd$
+^\.clang_complete$
+^\.clang-format$
+^CPPLINT\.cfg$

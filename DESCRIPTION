@@ -1,31 +1,31 @@
 Package: RcppRNG
 Type: Package
 Title: Templated Rcpp random number generators
-Version: 0.1.0.9000
+Version: 0.2.0
 Authors@R: person("Henrik", "Sloot", email = "henrik.sloot@gmail.com",
                   role = c("aut", "cre"))
-Description: 
-  Templated implementation of Rcpp's random number generators for the 
-  exonential distribution. This package is not intended to be used at this 
-  point! It's only purpose is to explore a simple mechanism to write 
-  sampling routines in R that could easily switch to another encapsulated 
+Description:
+  Templated implementation of Rcpp's random number generators for the
+  exonential distribution. This package is not intended to be used at this
+  point! It's only purpose is to explore a simple mechanism to write
+  sampling routines in R that could easily switch to another encapsulated
   RNG (e.g. \code{dqrng}).
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Depends:
   R (>= 3.0.2)
-Imports: 
+Imports:
     Rcpp,
     lifecycle
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
-LinkingTo: 
+RoxygenNote: 7.1.1
+LinkingTo:
     Rcpp,
-    BH (>= 1.64.0-1), 
+    BH (>= 1.64.0-1),
     sitmo (>= 2.0.0),
     dqrng
-Suggests: 
+Suggests:
     testthat,
     assertthat,
     rlang,

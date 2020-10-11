@@ -6,71 +6,69 @@
 using namespace Rcpp;
 
 // dqset_seed
-void dqset_seed(Rcpp::IntegerVector seed,
-                Rcpp::Nullable<Rcpp::IntegerVector> stream);
+void dqset_seed(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream);
 RcppExport SEXP _RcppRNG_dqset_seed(SEXP seedSEXP, SEXP streamSEXP) {
-  BEGIN_RCPP
-  Rcpp::traits::input_parameter<Rcpp::IntegerVector>::type seed(seedSEXP);
-  Rcpp::traits::input_parameter<Rcpp::Nullable<Rcpp::IntegerVector> >::type
-      stream(streamSEXP);
-  dqset_seed(seed, stream);
-  return R_NilValue;
-  END_RCPP
+BEGIN_RCPP
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type seed(seedSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type stream(streamSEXP);
+    dqset_seed(seed, stream);
+    return R_NilValue;
+END_RCPP
 }
 // dqRNGkind
 void dqRNGkind(std::string kind, const std::string& normal_kind);
 RcppExport SEXP _RcppRNG_dqRNGkind(SEXP kindSEXP, SEXP normal_kindSEXP) {
-  BEGIN_RCPP
-  Rcpp::traits::input_parameter<std::string>::type kind(kindSEXP);
-  Rcpp::traits::input_parameter<const std::string&>::type normal_kind(
-      normal_kindSEXP);
-  dqRNGkind(kind, normal_kind);
-  return R_NilValue;
-  END_RCPP
+BEGIN_RCPP
+    Rcpp::traits::input_parameter< std::string >::type kind(kindSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type normal_kind(normal_kindSEXP);
+    dqRNGkind(kind, normal_kind);
+    return R_NilValue;
+END_RCPP
 }
 // Rcpp_rexp_RNGScope
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate);
 RcppExport SEXP _RcppRNG_Rcpp_rexp_RNGScope(SEXP nSEXP, SEXP rateSEXP) {
-  BEGIN_RCPP
-  Rcpp::RObject rcpp_result_gen;
-  Rcpp::traits::input_parameter<R_xlen_t>::type n(nSEXP);
-  Rcpp::traits::input_parameter<double>::type rate(rateSEXP);
-  rcpp_result_gen = Rcpp::wrap(Rcpp_rexp_RNGScope(n, rate));
-  return rcpp_result_gen;
-  END_RCPP
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< R_xlen_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type rate(rateSEXP);
+    rcpp_result_gen = Rcpp::wrap(Rcpp_rexp_RNGScope(n, rate));
+    return rcpp_result_gen;
+END_RCPP
 }
 // Rcpp_rexp_RCPPRNG
 NumericVector Rcpp_rexp_RCPPRNG(R_xlen_t n, double rate);
 RcppExport SEXP _RcppRNG_Rcpp_rexp_RCPPRNG(SEXP nSEXP, SEXP rateSEXP) {
-  BEGIN_RCPP
-  Rcpp::RObject rcpp_result_gen;
-  Rcpp::traits::input_parameter<R_xlen_t>::type n(nSEXP);
-  Rcpp::traits::input_parameter<double>::type rate(rateSEXP);
-  rcpp_result_gen = Rcpp::wrap(Rcpp_rexp_RCPPRNG(n, rate));
-  return rcpp_result_gen;
-  END_RCPP
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< R_xlen_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type rate(rateSEXP);
+    rcpp_result_gen = Rcpp::wrap(Rcpp_rexp_RCPPRNG(n, rate));
+    return rcpp_result_gen;
+END_RCPP
 }
 // Rcpp_rexp_DQRNG
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate);
 RcppExport SEXP _RcppRNG_Rcpp_rexp_DQRNG(SEXP nSEXP, SEXP rateSEXP) {
-  BEGIN_RCPP
-  Rcpp::RObject rcpp_result_gen;
-  Rcpp::traits::input_parameter<R_xlen_t>::type n(nSEXP);
-  Rcpp::traits::input_parameter<double>::type rate(rateSEXP);
-  rcpp_result_gen = Rcpp::wrap(Rcpp_rexp_DQRNG(n, rate));
-  return rcpp_result_gen;
-  END_RCPP
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< R_xlen_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type rate(rateSEXP);
+    rcpp_result_gen = Rcpp::wrap(Rcpp_rexp_DQRNG(n, rate));
+    return rcpp_result_gen;
+END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RcppRNG_dqset_seed", (DL_FUNC)&_RcppRNG_dqset_seed, 2},
-    {"_RcppRNG_dqRNGkind", (DL_FUNC)&_RcppRNG_dqRNGkind, 2},
-    {"_RcppRNG_Rcpp_rexp_RNGScope", (DL_FUNC)&_RcppRNG_Rcpp_rexp_RNGScope, 2},
-    {"_RcppRNG_Rcpp_rexp_RCPPRNG", (DL_FUNC)&_RcppRNG_Rcpp_rexp_RCPPRNG, 2},
-    {"_RcppRNG_Rcpp_rexp_DQRNG", (DL_FUNC)&_RcppRNG_Rcpp_rexp_DQRNG, 2},
-    {NULL, NULL, 0}};
+    {"_RcppRNG_dqset_seed", (DL_FUNC) &_RcppRNG_dqset_seed, 2},
+    {"_RcppRNG_dqRNGkind", (DL_FUNC) &_RcppRNG_dqRNGkind, 2},
+    {"_RcppRNG_Rcpp_rexp_RNGScope", (DL_FUNC) &_RcppRNG_Rcpp_rexp_RNGScope, 2},
+    {"_RcppRNG_Rcpp_rexp_RCPPRNG", (DL_FUNC) &_RcppRNG_Rcpp_rexp_RCPPRNG, 2},
+    {"_RcppRNG_Rcpp_rexp_DQRNG", (DL_FUNC) &_RcppRNG_Rcpp_rexp_DQRNG, 2},
+    {NULL, NULL, 0}
+};
 
-RcppExport void R_init_RcppRNG(DllInfo* dll) {
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-  R_useDynamicSymbols(dll, FALSE);
+RcppExport void R_init_RcppRNG(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

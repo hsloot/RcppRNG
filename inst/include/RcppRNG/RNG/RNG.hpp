@@ -3,10 +3,12 @@
 
 namespace RcppRNG {
 
+namespace rng {
+
 class RNG {
- public:
-  virtual ~RNG(){};
-};  // RNG
+};  // class RNG
+
+} // rng
 
 }  // namespace RcppRNG
 

@@ -5,50 +5,42 @@
 
 namespace RcppRNG {
 
+namespace misc {
+
 // see https://stackoverflow.com/a/185848/11109217
 // TODO: Move into separate file and also use it for
 // the other RNG classes.
-template <typename T>
+template <typename _Tp>
 class ObjectCounter {
  public:
-  ObjectCounter();
-  ObjectCounter(const ObjectCounter& other);
-  ObjectCounter(ObjectCounter&& other) = default;  // move constructor
-  ~ObjectCounter();
+  ObjectCounter() {
+    ++total_;
+  }
+  ObjectCounter(
+      const ObjectCounter<_Tp>& other) {
+    if (this != &other) ++total_;
+  }
+  ObjectCounter(ObjectCounter&& other) noexcept = default;
 
-  ObjectCounter& operator=(const ObjectCounter& other);
-  ObjectCounter& operator=(ObjectCounter&& other) = default;
+  ~ObjectCounter() {
+    --total_;
+  }
 
-  static size_t OutstandingObjects();
+  ObjectCounter& operator=(
+      const ObjectCounter<_Tp>& other) {
+    ++total_;
+  }
+  ObjectCounter& operator=(ObjectCounter&& other) noexcept = default;
+
+  static std::size_t OutstandingObjects() {
+    return total_;
+  }
 
  private:
-  static size_t totalObjects_;
-};  // Object Counter
+  static std::size_t total_;
+};  // class ObjectCounter
 
-template <typename T>
-ObjectCounter<T>::ObjectCounter() {
-  ++totalObjects_;
-}
-
-template <typename T>
-ObjectCounter<T>::ObjectCounter(const ObjectCounter<T>& other) {
-  if (this != &other) ++totalObjects_;
-}
-
-template <typename T>
-ObjectCounter<T>::~ObjectCounter() {
-  --totalObjects_;
-}
-
-template <typename T>
-ObjectCounter<T>& ObjectCounter<T>::operator=(const ObjectCounter<T>& other) {
-  ++totalObjects_;
-}
-
-template <typename T>
-size_t ObjectCounter<T>::OutstandingObjects() {
-  return totalObjects_;
-}
+} // namespace misc
 
 }  // namespace RcppRNG
 
