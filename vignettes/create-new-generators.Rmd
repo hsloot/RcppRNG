@@ -155,7 +155,7 @@ NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) 
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
   NumericVector out(no_init(n));
-  RcppRNG::rng::RcppRNG engine{};
+  RcppRNG::rng::DQRNG engine{};
   erlang_distribution erlang{shape, rate};
   std::generate(out.begin(), out.end(),
                 [&engine, &erlang]() { return erlang(engine); });
