@@ -13,10 +13,10 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="Templated Rcpp random number generators">
 <meta property="og:description" content="
-  Templated implementation of Rcpps random number generators for the 
-  exonential distribution. This package is not intended to be used at this 
-  point! Its only purpose is to explore a simple mechanism to write 
-  sampling routines in R that could easily switch to another encapsulated 
+  Templated implementation of Rcpps random number generators for the
+  exonential distribution. This package is not intended to be used at this
+  point! Its only purpose is to explore a simple mechanism to write
+  sampling routines in R that could easily switch to another encapsulated
   RNG (e.g. \code{dqrng}).">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -36,7 +36,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">RcppRNG</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -88,62 +88,69 @@
 <p>At the moment, only a templated version of the generator for the exponential function is implemented. The generator template allows variations for difference RNG classes (which are essentially assumed to behave like <code>Rcpp::RNGScope</code>). I implemented my own version of <code>Rcpp::RNGScope</code> with <code>RcppRNG::RcppRNG</code> which contains it’s own static counter instead going through R’s Call API. Both version seem to be very similar in their performance.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">#include &lt;Rcpp.h&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">plugins</span>(<span class="st">"cpp11"</span>)]]</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">plugins</span>(<span class="st">"cpp14"</span>)]]</span>
 <span id="cb2-4"><a href="#cb2-4"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">depends</span>(RcppRNG,dqrng,BH,sitmo)]]</span>
 <span id="cb2-5"><a href="#cb2-5"></a></span>
 <span id="cb2-6"><a href="#cb2-6"></a><span class="co">#include &lt;RcppRNG.hpp&gt;</span></span>
 <span id="cb2-7"><a href="#cb2-7"></a></span>
 <span id="cb2-8"><a href="#cb2-8"></a>using namespace Rcpp;</span>
 <span id="cb2-9"><a href="#cb2-9"></a></span>
-<span id="cb2-10"><a href="#cb2-10"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
-<span id="cb2-11"><a href="#cb2-11"></a>NumericVector <span class="kw">Rcpp_rexp_RNGScope</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb2-12"><a href="#cb2-12"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
-<span id="cb2-13"><a href="#cb2-13"></a>  RcppRNG<span class="op">::</span>ExpDistribution<span class="op">&lt;</span>double<span class="op">&gt;</span><span class="st"> </span><span class="kw">param</span>(rate);</span>
-<span id="cb2-14"><a href="#cb2-14"></a>  RcppRNG<span class="op">::</span>ExpGenerator<span class="op">&lt;</span>RNGScope<span class="op">&gt;</span><span class="st"> </span><span class="kw">gen</span>(param);</span>
-<span id="cb2-15"><a href="#cb2-15"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(), gen);</span>
-<span id="cb2-16"><a href="#cb2-16"></a></span>
-<span id="cb2-17"><a href="#cb2-17"></a>  return out;</span>
-<span id="cb2-18"><a href="#cb2-18"></a>}</span>
-<span id="cb2-19"><a href="#cb2-19"></a></span>
-<span id="cb2-20"><a href="#cb2-20"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
-<span id="cb2-21"><a href="#cb2-21"></a>NumericVector <span class="kw">Rcpp_rexp_RcppRNG</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb2-22"><a href="#cb2-22"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
-<span id="cb2-23"><a href="#cb2-23"></a>  RcppRNG<span class="op">::</span>ExpDistribution<span class="op">&lt;</span>double<span class="op">&gt;</span><span class="st"> </span><span class="kw">param</span>(rate);</span>
-<span id="cb2-24"><a href="#cb2-24"></a>  RcppRNG<span class="op">::</span>ExpGenerator<span class="op">&lt;</span>RcppRNG<span class="op">::</span>RcppRNG<span class="op">&gt;</span><span class="st"> </span><span class="kw">gen</span>(param);</span>
-<span id="cb2-25"><a href="#cb2-25"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(), gen);</span>
-<span id="cb2-26"><a href="#cb2-26"></a></span>
-<span id="cb2-27"><a href="#cb2-27"></a>  return out;</span>
-<span id="cb2-28"><a href="#cb2-28"></a>}</span>
-<span id="cb2-29"><a href="#cb2-29"></a></span>
-<span id="cb2-30"><a href="#cb2-30"></a>use_seed &lt;-<span class="st"> </span>1623L</span>
-<span id="cb2-31"><a href="#cb2-31"></a></span>
-<span id="cb2-32"><a href="#cb2-32"></a><span class="kw">set.seed</span>(use_seed)</span>
-<span id="cb2-33"><a href="#cb2-33"></a><span class="kw">rexp</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
-<span id="cb2-34"><a href="#cb2-34"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
-<span id="cb2-35"><a href="#cb2-35"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>using unit_exponential_distribution =</span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="st">    </span>RcppRNG<span class="op">::</span>unit_exponential_distribution<span class="op">&lt;</span>double<span class="op">&gt;</span>;</span>
+<span id="cb2-12"><a href="#cb2-12"></a>using exponential_distribution =</span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="st">    </span>RcppRNG<span class="op">::</span>exponential_distribution<span class="op">&lt;</span>double, unit_exponential_distribution<span class="op">&gt;</span>;</span>
+<span id="cb2-14"><a href="#cb2-14"></a></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
+<span id="cb2-16"><a href="#cb2-16"></a>NumericVector <span class="kw">Rcpp_rexp_RNGScope</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
+<span id="cb2-17"><a href="#cb2-17"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb2-18"><a href="#cb2-18"></a>  Rcpp<span class="op">::</span>RNGScope engine{};</span>
+<span id="cb2-19"><a href="#cb2-19"></a>  exponential_distribution exp{rate};</span>
+<span id="cb2-20"><a href="#cb2-20"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(),</span>
+<span id="cb2-21"><a href="#cb2-21"></a>                [<span class="op">&amp;</span>engine, <span class="op">&amp;</span>exp]() { return <span class="kw">exp</span>(engine); });</span>
+<span id="cb2-22"><a href="#cb2-22"></a></span>
+<span id="cb2-23"><a href="#cb2-23"></a>  return out;</span>
+<span id="cb2-24"><a href="#cb2-24"></a>}</span>
+<span id="cb2-25"><a href="#cb2-25"></a></span>
+<span id="cb2-26"><a href="#cb2-26"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
+<span id="cb2-27"><a href="#cb2-27"></a>NumericVector <span class="kw">Rcpp_rexp_RcppRNG</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
+<span id="cb2-28"><a href="#cb2-28"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb2-29"><a href="#cb2-29"></a>  RcppRNG<span class="op">::</span>rng<span class="op">::</span>RcppRNG engine{};</span>
+<span id="cb2-30"><a href="#cb2-30"></a>  exponential_distribution exp{rate};</span>
+<span id="cb2-31"><a href="#cb2-31"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(),</span>
+<span id="cb2-32"><a href="#cb2-32"></a>                [<span class="op">&amp;</span>engine, <span class="op">&amp;</span>exp]() { return <span class="kw">exp</span>(engine); });</span>
+<span id="cb2-33"><a href="#cb2-33"></a></span>
+<span id="cb2-34"><a href="#cb2-34"></a>  return out;</span>
+<span id="cb2-35"><a href="#cb2-35"></a>}</span>
 <span id="cb2-36"><a href="#cb2-36"></a></span>
-<span id="cb2-37"><a href="#cb2-37"></a><span class="kw">set.seed</span>(use_seed)</span>
-<span id="cb2-38"><a href="#cb2-38"></a><span class="kw">Rcpp_rexp_RNGScope</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
-<span id="cb2-39"><a href="#cb2-39"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
-<span id="cb2-40"><a href="#cb2-40"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
-<span id="cb2-41"><a href="#cb2-41"></a></span>
-<span id="cb2-42"><a href="#cb2-42"></a><span class="kw">set.seed</span>(use_seed)</span>
-<span id="cb2-43"><a href="#cb2-43"></a><span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
-<span id="cb2-44"><a href="#cb2-44"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
-<span id="cb2-45"><a href="#cb2-45"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
-<span id="cb2-46"><a href="#cb2-46"></a></span>
-<span id="cb2-47"><a href="#cb2-47"></a>bench<span class="op">::</span><span class="kw">mark</span>(</span>
-<span id="cb2-48"><a href="#cb2-48"></a>  <span class="kw">rexp</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb2-49"><a href="#cb2-49"></a>  <span class="kw">Rcpp_rexp_RNGScope</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb2-50"><a href="#cb2-50"></a>  <span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb2-51"><a href="#cb2-51"></a>  <span class="dt">check=</span><span class="ot">FALSE</span></span>
-<span id="cb2-52"><a href="#cb2-52"></a>)</span>
-<span id="cb2-53"><a href="#cb2-53"></a><span class="co">#&gt; # A tibble: 3 x 6</span></span>
-<span id="cb2-54"><a href="#cb2-54"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
-<span id="cb2-55"><a href="#cb2-55"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb2-56"><a href="#cb2-56"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.55ms   6.49ms      147.  783.79KB     2.09</span></span>
-<span id="cb2-57"><a href="#cb2-57"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   4.02ms   5.23ms      182.    4.52MB     2.06</span></span>
-<span id="cb2-58"><a href="#cb2-58"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.04ms    5.3ms      179.  787.92KB     2.08</span></span></code></pre></div>
+<span id="cb2-37"><a href="#cb2-37"></a>use_seed &lt;-<span class="st"> </span>1623L</span>
+<span id="cb2-38"><a href="#cb2-38"></a></span>
+<span id="cb2-39"><a href="#cb2-39"></a><span class="kw">set.seed</span>(use_seed)</span>
+<span id="cb2-40"><a href="#cb2-40"></a><span class="kw">rexp</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-41"><a href="#cb2-41"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
+<span id="cb2-42"><a href="#cb2-42"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-43"><a href="#cb2-43"></a></span>
+<span id="cb2-44"><a href="#cb2-44"></a><span class="kw">set.seed</span>(use_seed)</span>
+<span id="cb2-45"><a href="#cb2-45"></a><span class="kw">Rcpp_rexp_RNGScope</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-46"><a href="#cb2-46"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
+<span id="cb2-47"><a href="#cb2-47"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-48"><a href="#cb2-48"></a></span>
+<span id="cb2-49"><a href="#cb2-49"></a><span class="kw">set.seed</span>(use_seed)</span>
+<span id="cb2-50"><a href="#cb2-50"></a><span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-51"><a href="#cb2-51"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
+<span id="cb2-52"><a href="#cb2-52"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-53"><a href="#cb2-53"></a></span>
+<span id="cb2-54"><a href="#cb2-54"></a>bench<span class="op">::</span><span class="kw">mark</span>(</span>
+<span id="cb2-55"><a href="#cb2-55"></a>  <span class="kw">rexp</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb2-56"><a href="#cb2-56"></a>  <span class="kw">Rcpp_rexp_RNGScope</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb2-57"><a href="#cb2-57"></a>  <span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb2-58"><a href="#cb2-58"></a>  <span class="dt">check=</span><span class="ot">FALSE</span></span>
+<span id="cb2-59"><a href="#cb2-59"></a>)</span>
+<span id="cb2-60"><a href="#cb2-60"></a><span class="co">#&gt; # A tibble: 3 x 6</span></span>
+<span id="cb2-61"><a href="#cb2-61"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
+<span id="cb2-62"><a href="#cb2-62"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
+<span id="cb2-63"><a href="#cb2-63"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.19ms   5.83ms      170.  783.79KB     2.07</span></span>
+<span id="cb2-64"><a href="#cb2-64"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)    3.9ms   4.41ms      221.    4.52MB     2.07</span></span>
+<span id="cb2-65"><a href="#cb2-65"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms   4.36ms      224.  787.92KB     4.23</span></span></code></pre></div>
 </div>
 <div id="why-is-that-useful" class="section level2">
 <h2 class="hasAnchor">
@@ -175,70 +182,76 @@
 <span id="cb5-20"><a href="#cb5-20"></a><span class="co">#&gt; # A tibble: 4 x 6</span></span>
 <span id="cb5-21"><a href="#cb5-21"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
 <span id="cb5-22"><a href="#cb5-22"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.83ms   7.08ms      127.     784KB     2.09</span></span>
-<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.98ms   5.24ms      178.     786KB     2.09</span></span>
-<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.28ms   5.29ms      181.     784KB     2.06</span></span>
-<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       7.71ms  10.01ms      102.     784KB    40.9</span></span></code></pre></div>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.25ms   6.06ms      162.     784KB     2.05</span></span>
+<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.87ms   4.62ms      210.     784KB     2.06</span></span>
+<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.65ms      211.     784KB     4.26</span></span>
+<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       7.66ms   8.97ms      106.     784KB    45.9</span></span></code></pre></div>
 <p>However, we can also use another random number generator (e.g. the one from <code>dqrng</code>):</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#include &lt;Rcpp.h&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">plugins</span>(<span class="st">"cpp11"</span>)]]</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">plugins</span>(<span class="st">"cpp14"</span>)]]</span>
 <span id="cb6-4"><a href="#cb6-4"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">depends</span>(RcppRNG,dqrng,BH,sitmo)]]</span>
 <span id="cb6-5"><a href="#cb6-5"></a></span>
 <span id="cb6-6"><a href="#cb6-6"></a><span class="co">#include &lt;RcppRNG.hpp&gt;</span></span>
 <span id="cb6-7"><a href="#cb6-7"></a></span>
 <span id="cb6-8"><a href="#cb6-8"></a>using namespace Rcpp;</span>
 <span id="cb6-9"><a href="#cb6-9"></a></span>
-<span id="cb6-10"><a href="#cb6-10"></a>RcppRNG<span class="op">::</span>DQRNG shared_dqrng =<span class="st"> </span>RcppRNG<span class="op">::</span><span class="kw">DQRNG</span>();</span>
-<span id="cb6-11"><a href="#cb6-11"></a></span>
-<span id="cb6-12"><a href="#cb6-12"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
-<span id="cb6-13"><a href="#cb6-13"></a>void <span class="kw">dqset_seed2</span>(Rcpp<span class="op">::</span>IntegerVector seed, Rcpp<span class="op">::</span>Nullable<span class="op">&lt;</span>Rcpp<span class="op">::</span>IntegerVector<span class="op">&gt;</span><span class="st"> </span><span class="dt">stream =</span> R_NilValue) {</span>
-<span id="cb6-14"><a href="#cb6-14"></a>  uint64_t _seed =<span class="st"> </span>dqrng<span class="op">::</span>convert_seed<span class="op">&lt;</span>uint64_t<span class="op">&gt;</span>(seed);</span>
-<span id="cb6-15"><a href="#cb6-15"></a>  <span class="cf">if</span> (<span class="kw">stream.isNotNull</span>()) {</span>
-<span id="cb6-16"><a href="#cb6-16"></a>    uint64_t _stream =<span class="st"> </span>dqrng<span class="op">::</span>convert_seed<span class="op">&lt;</span>uint64_t<span class="op">&gt;</span>(<span class="kw">stream.as</span>());</span>
-<span id="cb6-17"><a href="#cb6-17"></a>    shared_dqrng.shared_rng-&gt;<span class="kw">seed</span>(_seed, _stream);</span>
-<span id="cb6-18"><a href="#cb6-18"></a>  } <span class="cf">else</span> {</span>
-<span id="cb6-19"><a href="#cb6-19"></a>    shared_dqrng.shared_rng-&gt;<span class="kw">seed</span>(_seed);</span>
-<span id="cb6-20"><a href="#cb6-20"></a>  }</span>
-<span id="cb6-21"><a href="#cb6-21"></a>}</span>
-<span id="cb6-22"><a href="#cb6-22"></a></span>
-<span id="cb6-23"><a href="#cb6-23"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
-<span id="cb6-24"><a href="#cb6-24"></a>NumericVector <span class="kw">Rcpp_rexp_DQRNG</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb6-25"><a href="#cb6-25"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
-<span id="cb6-26"><a href="#cb6-26"></a>  RcppRNG<span class="op">::</span>ExpDistribution<span class="op">&lt;</span>double<span class="op">&gt;</span><span class="st"> </span><span class="kw">param</span>(rate);</span>
-<span id="cb6-27"><a href="#cb6-27"></a>  RcppRNG<span class="op">::</span>ExpGenerator<span class="op">&lt;</span>RcppRNG<span class="op">::</span>DQRNG<span class="op">&gt;</span><span class="st"> </span><span class="kw">gen</span>(param);</span>
-<span id="cb6-28"><a href="#cb6-28"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(), gen);</span>
-<span id="cb6-29"><a href="#cb6-29"></a></span>
-<span id="cb6-30"><a href="#cb6-30"></a>  return out;</span>
-<span id="cb6-31"><a href="#cb6-31"></a>}</span>
-<span id="cb6-32"><a href="#cb6-32"></a></span>
-<span id="cb6-33"><a href="#cb6-33"></a><span class="kw">dqset_seed2</span>(use_seed)</span>
-<span id="cb6-34"><a href="#cb6-34"></a><span class="kw">Rcpp_rexp_DQRNG</span>(<span class="fl">1e1</span>, <span class="fl">0.5</span>)</span>
-<span id="cb6-35"><a href="#cb6-35"></a><span class="co">#&gt;  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144</span></span>
-<span id="cb6-36"><a href="#cb6-36"></a><span class="co">#&gt;  [8] 2.2395507 0.6990022 0.1845893</span></span>
-<span id="cb6-37"><a href="#cb6-37"></a></span>
-<span id="cb6-38"><a href="#cb6-38"></a><span class="kw">dqset_seed2</span>(use_seed)</span>
-<span id="cb6-39"><a href="#cb6-39"></a><span class="kw">Rcpp_rexp_DQRNG</span>(<span class="fl">1e1</span>, <span class="fl">0.5</span>)</span>
-<span id="cb6-40"><a href="#cb6-40"></a><span class="co">#&gt;  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144</span></span>
-<span id="cb6-41"><a href="#cb6-41"></a><span class="co">#&gt;  [8] 2.2395507 0.6990022 0.1845893</span></span>
-<span id="cb6-42"><a href="#cb6-42"></a></span>
+<span id="cb6-10"><a href="#cb6-10"></a>using unit_exponential_distribution =</span>
+<span id="cb6-11"><a href="#cb6-11"></a><span class="st">    </span>RcppRNG<span class="op">::</span>unit_exponential_distribution<span class="op">&lt;</span>double<span class="op">&gt;</span>;</span>
+<span id="cb6-12"><a href="#cb6-12"></a>using exponential_distribution =</span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="st">    </span>RcppRNG<span class="op">::</span>exponential_distribution<span class="op">&lt;</span>double, unit_exponential_distribution<span class="op">&gt;</span>;</span>
+<span id="cb6-14"><a href="#cb6-14"></a></span>
+<span id="cb6-15"><a href="#cb6-15"></a>RcppRNG<span class="op">::</span>rng<span class="op">::</span>DQRNG shared_dqrng =<span class="st"> </span>RcppRNG<span class="op">::</span>rng<span class="op">::</span><span class="kw">DQRNG</span>();</span>
+<span id="cb6-16"><a href="#cb6-16"></a></span>
+<span id="cb6-17"><a href="#cb6-17"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
+<span id="cb6-18"><a href="#cb6-18"></a>void <span class="kw">dqset_seed2</span>(Rcpp<span class="op">::</span>IntegerVector seed, Rcpp<span class="op">::</span>Nullable<span class="op">&lt;</span>Rcpp<span class="op">::</span>IntegerVector<span class="op">&gt;</span><span class="st"> </span><span class="dt">stream =</span> R_NilValue) {</span>
+<span id="cb6-19"><a href="#cb6-19"></a>  uint64_t _seed =<span class="st"> </span>dqrng<span class="op">::</span>convert_seed<span class="op">&lt;</span>uint64_t<span class="op">&gt;</span>(seed);</span>
+<span id="cb6-20"><a href="#cb6-20"></a>  <span class="cf">if</span> (<span class="kw">stream.isNotNull</span>()) {</span>
+<span id="cb6-21"><a href="#cb6-21"></a>    uint64_t _stream =<span class="st"> </span>dqrng<span class="op">::</span>convert_seed<span class="op">&lt;</span>uint64_t<span class="op">&gt;</span>(<span class="kw">stream.as</span>());</span>
+<span id="cb6-22"><a href="#cb6-22"></a>    shared_dqrng.shared_rng-&gt;<span class="kw">seed</span>(_seed, _stream);</span>
+<span id="cb6-23"><a href="#cb6-23"></a>  } <span class="cf">else</span> {</span>
+<span id="cb6-24"><a href="#cb6-24"></a>    shared_dqrng.shared_rng-&gt;<span class="kw">seed</span>(_seed);</span>
+<span id="cb6-25"><a href="#cb6-25"></a>  }</span>
+<span id="cb6-26"><a href="#cb6-26"></a>}</span>
+<span id="cb6-27"><a href="#cb6-27"></a></span>
+<span id="cb6-28"><a href="#cb6-28"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
+<span id="cb6-29"><a href="#cb6-29"></a>NumericVector <span class="kw">Rcpp_rexp_DQRNG</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
+<span id="cb6-30"><a href="#cb6-30"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb6-31"><a href="#cb6-31"></a>  RcppRNG<span class="op">::</span>rng<span class="op">::</span>DQRNG engine{};</span>
+<span id="cb6-32"><a href="#cb6-32"></a>  exponential_distribution exp{rate};</span>
+<span id="cb6-33"><a href="#cb6-33"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(),</span>
+<span id="cb6-34"><a href="#cb6-34"></a>                [<span class="op">&amp;</span>engine, <span class="op">&amp;</span>exp]() { return <span class="kw">exp</span>(engine); });</span>
+<span id="cb6-35"><a href="#cb6-35"></a></span>
+<span id="cb6-36"><a href="#cb6-36"></a>  return out;</span>
+<span id="cb6-37"><a href="#cb6-37"></a>}</span>
+<span id="cb6-38"><a href="#cb6-38"></a></span>
+<span id="cb6-39"><a href="#cb6-39"></a><span class="kw">dqset_seed2</span>(use_seed)</span>
+<span id="cb6-40"><a href="#cb6-40"></a><span class="kw">Rcpp_rexp_DQRNG</span>(<span class="fl">1e1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb6-41"><a href="#cb6-41"></a><span class="co">#&gt;  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144</span></span>
+<span id="cb6-42"><a href="#cb6-42"></a><span class="co">#&gt;  [8] 2.2395507 0.6990022 0.1845893</span></span>
 <span id="cb6-43"><a href="#cb6-43"></a></span>
-<span id="cb6-44"><a href="#cb6-44"></a>bench<span class="op">::</span><span class="kw">mark</span>(</span>
-<span id="cb6-45"><a href="#cb6-45"></a>  <span class="kw">rexp</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb6-46"><a href="#cb6-46"></a>  <span class="kw">Rcpp_rexp_RNGScope</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb6-47"><a href="#cb6-47"></a>  <span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb6-48"><a href="#cb6-48"></a>  <span class="kw">Rcpp_rexp_DQRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb6-49"><a href="#cb6-49"></a>  <span class="kw">Rcpp_rexp_slow</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb6-50"><a href="#cb6-50"></a>  <span class="dt">check=</span><span class="ot">FALSE</span></span>
-<span id="cb6-51"><a href="#cb6-51"></a>)</span>
-<span id="cb6-52"><a href="#cb6-52"></a><span class="co">#&gt; # A tibble: 5 x 6</span></span>
-<span id="cb6-53"><a href="#cb6-53"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
-<span id="cb6-54"><a href="#cb6-54"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb6-55"><a href="#cb6-55"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.29ms   6.48ms      151.     784KB     2.07</span></span>
-<span id="cb6-56"><a href="#cb6-56"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.76ms      181.     786KB     2.06</span></span>
-<span id="cb6-57"><a href="#cb6-57"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms    4.3ms      224.     784KB     4.19</span></span>
-<span id="cb6-58"><a href="#cb6-58"></a><span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    841.58µs   1.21ms      803.     781KB    14.0 </span></span>
-<span id="cb6-59"><a href="#cb6-59"></a><span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       7.52ms   8.09ms      117.     784KB    51.4</span></span></code></pre></div>
+<span id="cb6-44"><a href="#cb6-44"></a><span class="kw">dqset_seed2</span>(use_seed)</span>
+<span id="cb6-45"><a href="#cb6-45"></a><span class="kw">Rcpp_rexp_DQRNG</span>(<span class="fl">1e1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb6-46"><a href="#cb6-46"></a><span class="co">#&gt;  [1] 0.3163569 2.0283718 1.2877356 1.9899493 0.1225778 9.9800737 1.1667144</span></span>
+<span id="cb6-47"><a href="#cb6-47"></a><span class="co">#&gt;  [8] 2.2395507 0.6990022 0.1845893</span></span>
+<span id="cb6-48"><a href="#cb6-48"></a></span>
+<span id="cb6-49"><a href="#cb6-49"></a></span>
+<span id="cb6-50"><a href="#cb6-50"></a>bench<span class="op">::</span><span class="kw">mark</span>(</span>
+<span id="cb6-51"><a href="#cb6-51"></a>  <span class="kw">rexp</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb6-52"><a href="#cb6-52"></a>  <span class="kw">Rcpp_rexp_RNGScope</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb6-53"><a href="#cb6-53"></a>  <span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb6-54"><a href="#cb6-54"></a>  <span class="kw">Rcpp_rexp_DQRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb6-55"><a href="#cb6-55"></a>  <span class="kw">Rcpp_rexp_slow</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb6-56"><a href="#cb6-56"></a>  <span class="dt">check=</span><span class="ot">FALSE</span></span>
+<span id="cb6-57"><a href="#cb6-57"></a>)</span>
+<span id="cb6-58"><a href="#cb6-58"></a><span class="co">#&gt; # A tibble: 5 x 6</span></span>
+<span id="cb6-59"><a href="#cb6-59"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
+<span id="cb6-60"><a href="#cb6-60"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
+<span id="cb6-61"><a href="#cb6-61"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.21ms   5.85ms      168.     784KB     2.05</span></span>
+<span id="cb6-62"><a href="#cb6-62"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.33ms      222.     784KB     4.19</span></span>
+<span id="cb6-63"><a href="#cb6-63"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms   4.34ms      224.     784KB     4.22</span></span>
+<span id="cb6-64"><a href="#cb6-64"></a><span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)       914µs   1.26ms      784.     781KB    13.7 </span></span>
+<span id="cb6-65"><a href="#cb6-65"></a><span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       7.78ms   9.45ms      102.     784KB    42.8</span></span></code></pre></div>
 <p>The main benefit of this design is that it allows us to implement new sampling algorithms, which are based on basic generators (e.g. exp, unif, …) such that they can be used with the base R RNG or other RNG’s (e.g. dqrng’s). An example is described in a <a href="articles/create-new-generators.html">create new generators</a>.</p>
 </div>
 <div id="license" class="section level2">

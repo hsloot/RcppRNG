@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RcppRNG</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
 <a href="#setup" class="anchor"></a>Setup</h2>
 <p>First, you have to tell <code>Rcpp</code> that you are using <code>c++11</code> and that your code links to the packages <code>RcppRNG</code> (for obvious reasons) as well as <code>dqrng</code>, <code>BH</code>, and <code>sitmo</code> (to use the RNG from <code>dqrng</code>).</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="pp">#include </span><span class="im">&lt;Rcpp.h&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="co">// [[Rcpp::plugins("cpp11")]]</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co">// [[Rcpp::plugins("cpp14")]]</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="co">// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a></span>
 <span id="cb1-5"><a href="#cb1-5"></a><span class="pp">#include </span><span class="im">&lt;RcppRNG.hpp&gt;</span></span></code></pre></div>
@@ -101,102 +101,143 @@
 <h3 class="hasAnchor">
 <a href="#the-distribution" class="anchor"></a>The distribution</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">namespace</span> RcppRNG {</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">class</span> ErlangDistribution : <span class="kw">public</span> UnivariateDistribution {</span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">public</span>:</span>
-<span id="cb2-4"><a href="#cb2-4"></a>  ErlangDistribution() :</span>
-<span id="cb2-5"><a href="#cb2-5"></a>      <span class="va">shape_</span>(<span class="dv">1</span>), <span class="va">rate_</span>(<span class="fl">1.</span>) {}</span>
-<span id="cb2-6"><a href="#cb2-6"></a>  ErlangDistribution(<span class="dt">int</span> shape, <span class="dt">double</span> rate) :</span>
-<span id="cb2-7"><a href="#cb2-7"></a>      <span class="va">shape_</span>(shape), <span class="va">rate_</span>(rate) {}</span>
-<span id="cb2-8"><a href="#cb2-8"></a>  </span>
-<span id="cb2-9"><a href="#cb2-9"></a>  <span class="dt">int</span> shape() <span class="at">const</span>;</span>
-<span id="cb2-10"><a href="#cb2-10"></a>  <span class="dt">double</span> rate() <span class="at">const</span>;</span>
-<span id="cb2-11"><a href="#cb2-11"></a><span class="kw">private</span>:</span>
-<span id="cb2-12"><a href="#cb2-12"></a>  <span class="dt">int</span> <span class="va">shape_</span>;</span>
-<span id="cb2-13"><a href="#cb2-13"></a>  <span class="dt">double</span> <span class="va">rate_</span>;</span>
-<span id="cb2-14"><a href="#cb2-14"></a>}; <span class="co">// ErlangDistribution</span></span>
-<span id="cb2-15"><a href="#cb2-15"></a></span>
-<span id="cb2-16"><a href="#cb2-16"></a><span class="dt">int</span> ErlangDistribution::shape() <span class="at">const</span> {</span>
-<span id="cb2-17"><a href="#cb2-17"></a>  <span class="cf">return</span> <span class="va">shape_</span>;</span>
-<span id="cb2-18"><a href="#cb2-18"></a>}</span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">namespace</span> distribution {</span>
+<span id="cb2-4"><a href="#cb2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType, <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">class</span> erlang_distribution {</span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">public</span>:</span>
+<span id="cb2-8"><a href="#cb2-8"></a>  <span class="kw">using</span> <span class="dt">output_type</span> = _RealType;</span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="kw">struct</span> <span class="dt">input_type</span> {</span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="kw">using</span> <span class="dt">shape_type</span> = _IntType;</span>
+<span id="cb2-11"><a href="#cb2-11"></a>    <span class="kw">using</span> <span class="dt">lambda_type</span> = _RealType;</span>
+<span id="cb2-12"><a href="#cb2-12"></a>  };</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a>  <span class="kw">class</span> <span class="dt">param_type</span> {</span>
+<span id="cb2-15"><a href="#cb2-15"></a>   <span class="kw">public</span>:</span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="kw">explicit</span> <span class="dt">param_type</span>(<span class="at">const</span> _IntType shape = _IntType(<span class="dv">1</span>), <span class="at">const</span> _RealType lambda = _RealType(<span class="fl">1.</span>)) : <span class="va">shape_</span>{shape}, <span class="va">exponential_distribution_</span>{lambda} {}</span>
+<span id="cb2-17"><a href="#cb2-17"></a></span>
+<span id="cb2-18"><a href="#cb2-18"></a>    <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
 <span id="cb2-19"><a href="#cb2-19"></a></span>
-<span id="cb2-20"><a href="#cb2-20"></a><span class="dt">double</span> ErlangDistribution::rate() <span class="at">const</span> {</span>
-<span id="cb2-21"><a href="#cb2-21"></a>  <span class="cf">return</span> <span class="va">rate_</span>;</span>
-<span id="cb2-22"><a href="#cb2-22"></a>}</span>
-<span id="cb2-23"><a href="#cb2-23"></a>} <span class="co">// RcppRNG</span></span></code></pre></div>
-</div>
-<div id="the-generator" class="section level3">
-<h3 class="hasAnchor">
-<a href="#the-generator" class="anchor"></a>The generator</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">namespace</span> RcppRNG {</span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">class</span> ErlangGenerator : <span class="kw">public</span> Generator&lt;T, <span class="dt">double</span>, ErlangDistribution&gt; { </span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="kw">public</span>:</span>
-<span id="cb3-5"><a href="#cb3-5"></a>  ErlangGenerator();</span>
-<span id="cb3-6"><a href="#cb3-6"></a>  ErlangGenerator(<span class="at">const</span> ErlangDistribution&amp; param);</span>
-<span id="cb3-7"><a href="#cb3-7"></a>  </span>
-<span id="cb3-8"><a href="#cb3-8"></a>  <span class="kw">inline</span> <span class="dt">double</span> <span class="kw">operator</span>()() <span class="at">const</span>;</span>
-<span id="cb3-9"><a href="#cb3-9"></a><span class="kw">private</span>:</span>
-<span id="cb3-10"><a href="#cb3-10"></a>  ErlangDistribution <span class="va">param_</span>;</span>
-<span id="cb3-11"><a href="#cb3-11"></a>  ExpGenerator&lt;T&gt; <span class="va">exp_generator_</span>;</span>
-<span id="cb3-12"><a href="#cb3-12"></a>}; <span class="co">// ErlangGenerator</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a></span>
-<span id="cb3-14"><a href="#cb3-14"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
-<span id="cb3-15"><a href="#cb3-15"></a>ErlangGenerator&lt;T&gt;::ErlangGenerator() : </span>
-<span id="cb3-16"><a href="#cb3-16"></a>    <span class="va">param_</span>(), <span class="va">exp_generator_</span>(ExpGenerator&lt;T&gt;(ExpDistribution&lt;<span class="dt">double</span>&gt;(<span class="fl">1.</span> / <span class="va">param_</span>.rate()))) {</span>
-<span id="cb3-17"><a href="#cb3-17"></a>}</span>
-<span id="cb3-18"><a href="#cb3-18"></a></span>
-<span id="cb3-19"><a href="#cb3-19"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
-<span id="cb3-20"><a href="#cb3-20"></a>ErlangGenerator&lt;T&gt;::ErlangGenerator(<span class="at">const</span> ErlangDistribution&amp; param) : </span>
-<span id="cb3-21"><a href="#cb3-21"></a>    <span class="va">param_</span>(param), <span class="va">exp_generator_</span>(ExpGenerator&lt;T&gt;(ExpDistribution&lt;<span class="dt">double</span>&gt;(<span class="fl">1.</span> / <span class="va">param_</span>.rate()))) {}</span>
-<span id="cb3-22"><a href="#cb3-22"></a></span>
-<span id="cb3-23"><a href="#cb3-23"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;</span>
-<span id="cb3-24"><a href="#cb3-24"></a><span class="kw">inline</span> <span class="dt">double</span> ErlangGenerator&lt;T&gt;::<span class="kw">operator</span>()() <span class="at">const</span> {</span>
-<span id="cb3-25"><a href="#cb3-25"></a>  <span class="dt">double</span> out = <span class="fl">0.</span>;</span>
-<span id="cb3-26"><a href="#cb3-26"></a>  <span class="cf">for</span> (<span class="dt">int</span> j=<span class="dv">1</span>; j&lt;=<span class="va">param_</span>.shape(); j++)</span>
-<span id="cb3-27"><a href="#cb3-27"></a>    out += <span class="va">exp_generator_</span>();</span>
-<span id="cb3-28"><a href="#cb3-28"></a></span>
-<span id="cb3-29"><a href="#cb3-29"></a>  <span class="cf">return</span> out;</span>
-<span id="cb3-30"><a href="#cb3-30"></a>}</span>
-<span id="cb3-31"><a href="#cb3-31"></a>} <span class="co">// RcppRNG</span></span></code></pre></div>
+<span id="cb2-20"><a href="#cb2-20"></a>    _IntType shape() <span class="at">const</span> {</span>
+<span id="cb2-21"><a href="#cb2-21"></a>      <span class="cf">return</span> <span class="va">shape_</span>;</span>
+<span id="cb2-22"><a href="#cb2-22"></a>    }</span>
+<span id="cb2-23"><a href="#cb2-23"></a></span>
+<span id="cb2-24"><a href="#cb2-24"></a>    _RealType lambda() <span class="at">const</span> {</span>
+<span id="cb2-25"><a href="#cb2-25"></a>      <span class="cf">return</span> <span class="va">exponential_distribution_</span>.params().lambda();</span>
+<span id="cb2-26"><a href="#cb2-26"></a>    }</span>
+<span id="cb2-27"><a href="#cb2-27"></a></span>
+<span id="cb2-28"><a href="#cb2-28"></a>    <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
+<span id="cb2-29"><a href="#cb2-29"></a>    <span class="kw">typename</span> _ExponentialDistributionType::<span class="dt">output_type</span></span>
+<span id="cb2-30"><a href="#cb2-30"></a>    exponential_distribution(_EngineType&amp;&amp; engine) {</span>
+<span id="cb2-31"><a href="#cb2-31"></a>      <span class="cf">return</span> <span class="va">exponential_distribution_</span>(engine);</span>
+<span id="cb2-32"><a href="#cb2-32"></a>    }</span>
+<span id="cb2-33"><a href="#cb2-33"></a></span>
+<span id="cb2-34"><a href="#cb2-34"></a>   <span class="kw">private</span>:</span>
+<span id="cb2-35"><a href="#cb2-35"></a>    _IntType <span class="va">shape_</span>;</span>
+<span id="cb2-36"><a href="#cb2-36"></a>    _ExponentialDistributionType <span class="va">exponential_distribution_</span>;</span>
+<span id="cb2-37"><a href="#cb2-37"></a>  };</span>
+<span id="cb2-38"><a href="#cb2-38"></a></span>
+<span id="cb2-39"><a href="#cb2-39"></a>  <span class="kw">explicit</span> erlang_distribution(<span class="at">const</span> _IntType shape = _IntType(<span class="dv">1</span>), <span class="at">const</span> _RealType rate = _RealType(<span class="fl">1.</span>)) : <span class="va">params_</span>(shape, rate) {}</span>
+<span id="cb2-40"><a href="#cb2-40"></a></span>
+<span id="cb2-41"><a href="#cb2-41"></a>  <span class="kw">explicit</span> erlang_distribution(<span class="at">const</span> <span class="dt">param_type</span>&amp; params) : <span class="va">params_</span>(params) {}</span>
+<span id="cb2-42"><a href="#cb2-42"></a></span>
+<span id="cb2-43"><a href="#cb2-43"></a>  <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
+<span id="cb2-44"><a href="#cb2-44"></a></span>
+<span id="cb2-45"><a href="#cb2-45"></a>  <span class="dt">param_type</span> params() <span class="at">const</span> {</span>
+<span id="cb2-46"><a href="#cb2-46"></a>    <span class="cf">return</span> <span class="va">params_</span>;</span>
+<span id="cb2-47"><a href="#cb2-47"></a>  }</span>
+<span id="cb2-48"><a href="#cb2-48"></a></span>
+<span id="cb2-49"><a href="#cb2-49"></a>  <span class="dt">void</span> params(<span class="at">const</span> <span class="dt">param_type</span>&amp; params) {</span>
+<span id="cb2-50"><a href="#cb2-50"></a>    <span class="va">params_</span> = params;</span>
+<span id="cb2-51"><a href="#cb2-51"></a>  }</span>
+<span id="cb2-52"><a href="#cb2-52"></a></span>
+<span id="cb2-53"><a href="#cb2-53"></a>  <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
+<span id="cb2-54"><a href="#cb2-54"></a>  _RealType <span class="kw">operator</span>()(_EngineType&amp;&amp; engine) {</span>
+<span id="cb2-55"><a href="#cb2-55"></a>    _RealType out = _RealType(<span class="fl">0.</span>);</span>
+<span id="cb2-56"><a href="#cb2-56"></a>    <span class="cf">for</span> (_IntType j=_IntType(<span class="dv">1</span>); j&lt;=<span class="va">params_</span>.shape(); ++j) out += <span class="va">params_</span>.exponential_distribution(</span>
+<span id="cb2-57"><a href="#cb2-57"></a>               <span class="bu">std::</span>forward&lt;_EngineType&gt;(engine));</span>
+<span id="cb2-58"><a href="#cb2-58"></a></span>
+<span id="cb2-59"><a href="#cb2-59"></a>    <span class="cf">return</span> out;</span>
+<span id="cb2-60"><a href="#cb2-60"></a>  }</span>
+<span id="cb2-61"><a href="#cb2-61"></a></span>
+<span id="cb2-62"><a href="#cb2-62"></a><span class="kw">private</span>:</span>
+<span id="cb2-63"><a href="#cb2-63"></a>  <span class="dt">param_type</span> <span class="va">params_</span>;</span>
+<span id="cb2-64"><a href="#cb2-64"></a>}; <span class="co">// erlang_distribution</span></span>
+<span id="cb2-65"><a href="#cb2-65"></a></span>
+<span id="cb2-66"><a href="#cb2-66"></a>} <span class="co">// namespace distribution</span></span>
+<span id="cb2-67"><a href="#cb2-67"></a></span>
+<span id="cb2-68"><a href="#cb2-68"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType, <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
+<span id="cb2-69"><a href="#cb2-69"></a><span class="kw">using</span> erlang_distribution = distribution::erlang_distribution&lt;_IntType, _RealType, _ExponentialDistributionType&gt;;</span>
+<span id="cb2-70"><a href="#cb2-70"></a></span>
+<span id="cb2-71"><a href="#cb2-71"></a>} <span class="co">// namespace RcppRNG</span></span></code></pre></div>
 </div>
 <div id="rcpp-wrapper" class="section level3">
 <h3 class="hasAnchor">
 <a href="#rcpp-wrapper" class="anchor"></a><code>Rcpp</code>-wrapper</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">using</span> <span class="kw">namespace</span> Rcpp;</span>
-<span id="cb4-2"><a href="#cb4-2"></a></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="co">//' @export</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a>NumericVector Rcpp_rerlang_RcppRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
-<span id="cb4-6"><a href="#cb4-6"></a>  NumericVector out(no_init(n));</span>
-<span id="cb4-7"><a href="#cb4-7"></a>  RcppRNG::ErlangDistribution param(shape, rate);</span>
-<span id="cb4-8"><a href="#cb4-8"></a>  RcppRNG::ErlangGenerator&lt;RcppRNG::RcppRNG&gt; gen(param);</span>
-<span id="cb4-9"><a href="#cb4-9"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(), gen);</span>
-<span id="cb4-10"><a href="#cb4-10"></a></span>
-<span id="cb4-11"><a href="#cb4-11"></a>  <span class="cf">return</span> out;</span>
-<span id="cb4-12"><a href="#cb4-12"></a>}</span>
-<span id="cb4-13"><a href="#cb4-13"></a></span>
-<span id="cb4-14"><a href="#cb4-14"></a><span class="co">//' @export</span></span>
-<span id="cb4-15"><a href="#cb4-15"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
-<span id="cb4-16"><a href="#cb4-16"></a>NumericVector Rcpp_rerlang_DQRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
-<span id="cb4-17"><a href="#cb4-17"></a>  NumericVector out(no_init(n));</span>
-<span id="cb4-18"><a href="#cb4-18"></a>  RcppRNG::ErlangDistribution param(shape, rate);</span>
-<span id="cb4-19"><a href="#cb4-19"></a>  RcppRNG::ErlangGenerator&lt;RcppRNG::DQRNG&gt; gen(param);</span>
-<span id="cb4-20"><a href="#cb4-20"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(), gen);</span>
-<span id="cb4-21"><a href="#cb4-21"></a></span>
-<span id="cb4-22"><a href="#cb4-22"></a>  <span class="cf">return</span> out;</span>
-<span id="cb4-23"><a href="#cb4-23"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">using</span> <span class="kw">namespace</span> Rcpp;</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">using</span> unit_exponential_distribution =</span>
+<span id="cb3-4"><a href="#cb3-4"></a>    RcppRNG::unit_exponential_distribution&lt;<span class="dt">double</span>&gt;;</span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="kw">using</span> exponential_distribution =</span>
+<span id="cb3-6"><a href="#cb3-6"></a>    RcppRNG::exponential_distribution&lt;<span class="dt">double</span>, unit_exponential_distribution&gt;;</span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="kw">using</span> erlang_distribution =</span>
+<span id="cb3-8"><a href="#cb3-8"></a>    RcppRNG::erlang_distribution&lt;<span class="dt">int</span>, <span class="dt">double</span>, exponential_distribution&gt;;</span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="co">//' @export</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>NumericVector Rcpp_rerlang_RcppRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
+<span id="cb3-13"><a href="#cb3-13"></a>  NumericVector out(no_init(n));</span>
+<span id="cb3-14"><a href="#cb3-14"></a>  RcppRNG::rng::RcppRNG engine{};</span>
+<span id="cb3-15"><a href="#cb3-15"></a>  erlang_distribution erlang{shape, rate};</span>
+<span id="cb3-16"><a href="#cb3-16"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(),</span>
+<span id="cb3-17"><a href="#cb3-17"></a>                [&amp;engine, &amp;erlang]() { <span class="cf">return</span> erlang(engine); });</span>
+<span id="cb3-18"><a href="#cb3-18"></a></span>
+<span id="cb3-19"><a href="#cb3-19"></a>  <span class="cf">return</span> out;</span>
+<span id="cb3-20"><a href="#cb3-20"></a>}</span>
+<span id="cb3-21"><a href="#cb3-21"></a></span>
+<span id="cb3-22"><a href="#cb3-22"></a><span class="co">//' @export</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
+<span id="cb3-24"><a href="#cb3-24"></a>NumericVector Rcpp_rerlang_DQRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
+<span id="cb3-25"><a href="#cb3-25"></a>  NumericVector out(no_init(n));</span>
+<span id="cb3-26"><a href="#cb3-26"></a>  RcppRNG::rng::RcppRNG engine{};</span>
+<span id="cb3-27"><a href="#cb3-27"></a>  erlang_distribution erlang{shape, rate};</span>
+<span id="cb3-28"><a href="#cb3-28"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(),</span>
+<span id="cb3-29"><a href="#cb3-29"></a>                [&amp;engine, &amp;erlang]() { <span class="cf">return</span> erlang(engine); });</span>
+<span id="cb3-30"><a href="#cb3-30"></a></span>
+<span id="cb3-31"><a href="#cb3-31"></a>  <span class="cf">return</span> out;</span>
+<span id="cb3-32"><a href="#cb3-32"></a>}</span></code></pre></div>
 </div>
 </div>
 <div id="test" class="section level2">
 <h2 class="hasAnchor">
 <a href="#test" class="anchor"></a>Test</h2>
-<div class="sourceCode" id="cb5"><pre class="downlit">
+<div class="sourceCode" id="cb4"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1623L</span><span class="op">)</span>
 <span class="fu">Rcpp_rerlang_RcppRNG</span><span class="op">(</span><span class="fl">10</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>
-<span class="co">#&gt;  [1] 2.0565993 2.0133517 0.9585955 0.7749312 2.1677340 1.8031484 1.4860104</span>
-<span class="co">#&gt;  [8] 2.0382069 2.5133237 1.1352339</span>
+<span class="co">#&gt;  [1] 10.502098  7.088853  5.084991  7.435394  2.082935  7.849784  5.739142</span>
+<span class="co">#&gt;  [8]  9.858097  8.521792  6.443745</span>
+<span class="fu">RcppRNG</span><span class="fu">::</span><span class="fu"><a href="../reference/dqset_seed.html">dqset_seed</a></span><span class="op">(</span><span class="fl">1623L</span><span class="op">)</span>
 <span class="fu">Rcpp_rerlang_DQRNG</span><span class="op">(</span><span class="fl">10</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>
-<span class="co">#&gt;  [1] 1.7589883 0.8963623 2.7560277 3.6270184 3.0515001 3.8782021 0.9575631</span>
-<span class="co">#&gt;  [8] 2.0474099 3.4866885 2.4792410</span></pre></div>
+<span class="co">#&gt;  [1]  4.253946  6.632050  8.921737 10.021481  4.747156  9.107386  9.120729</span>
+<span class="co">#&gt;  [8] 10.079515  8.454977  4.264538</span></pre></div>
+</div>
+<div id="benchmark" class="section level2">
+<h2 class="hasAnchor">
+<a href="#benchmark" class="anchor"></a>Benchmark</h2>
+<div class="sourceCode" id="cb5"><pre class="downlit">
+<span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">1e5L</span>
+<span class="va">shape</span> <span class="op">&lt;-</span> <span class="fl">10L</span>
+<span class="va">lambda</span> <span class="op">&lt;-</span> <span class="fl">0.5</span>
+<span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu"><a href="http://bench.r-lib.org/reference/mark.html">mark</a></span><span class="op">(</span>
+  Rcpp <span class="op">=</span> <span class="fu">Rcpp_rerlang_RcppRNG</span><span class="op">(</span><span class="va">n</span>, <span class="va">shape</span>, <span class="va">lambda</span><span class="op">)</span>,
+  dqrng <span class="op">=</span> <span class="fu">Rcpp_rerlang_DQRNG</span><span class="op">(</span><span class="va">n</span>, <span class="va">shape</span>, <span class="va">lambda</span><span class="op">)</span>,
+  check<span class="op">=</span><span class="cn">FALSE</span>,
+  min_iterations <span class="op">=</span> <span class="fl">20L</span>
+<span class="op">)</span>
+<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span>
+<span class="co">#&gt; Loading required namespace: tidyr</span></pre></div>
+<p><img src="create-new-generators_files/figure-html/Bernchmark-Erlang-generator-1.png" width="700"></p>
 </div>
   </div>
 
