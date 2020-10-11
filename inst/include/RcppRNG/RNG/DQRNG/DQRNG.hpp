@@ -31,7 +31,7 @@ const dqrng::exponential_distribution DQRNG::ued{};
 #ifndef RCPPRNG_DQRNG_TOTAL
 #define RCPPRNG_DQRNG_TOTAL
 template <>
-auto misc::ObjectCounter<rng::DQRNG>::total_ = std::size_t{0};
+std::size_t misc::ObjectCounter<rng::DQRNG>::total_ = std::size_t{0};
 #endif  // RCPPRNG_DQRNG_TOTAL
 
 namespace rng {

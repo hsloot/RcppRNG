@@ -20,7 +20,7 @@ class RcppRNG : public RNG, private misc::ObjectCounter<RcppRNG> {
 #ifndef RCPPRNG_RCPPRNG_TOTAL
 #define RCPPRNG_RCPPRNG_TOTAL
 template <>
-auto misc::ObjectCounter<rng::RcppRNG>::total_ = std::size_t{0};
+std::size_t misc::ObjectCounter<rng::RcppRNG>::total_ = std::size_t{0};
 #endif  // RCPPRNG_RCPPRNG_TOTAL
 
 namespace rng {
