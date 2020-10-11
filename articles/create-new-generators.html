@@ -200,7 +200,7 @@
 <span id="cb3-23"><a href="#cb3-23"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
 <span id="cb3-24"><a href="#cb3-24"></a>NumericVector Rcpp_rerlang_DQRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
 <span id="cb3-25"><a href="#cb3-25"></a>  NumericVector out(no_init(n));</span>
-<span id="cb3-26"><a href="#cb3-26"></a>  RcppRNG::rng::RcppRNG engine{};</span>
+<span id="cb3-26"><a href="#cb3-26"></a>  RcppRNG::rng::DQRNG engine{};</span>
 <span id="cb3-27"><a href="#cb3-27"></a>  erlang_distribution erlang{shape, rate};</span>
 <span id="cb3-28"><a href="#cb3-28"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(),</span>
 <span id="cb3-29"><a href="#cb3-29"></a>                [&amp;engine, &amp;erlang]() { <span class="cf">return</span> erlang(engine); });</span>
@@ -219,8 +219,8 @@
 <span class="co">#&gt;  [8]  9.858097  8.521792  6.443745</span>
 <span class="fu">RcppRNG</span><span class="fu">::</span><span class="fu"><a href="../reference/dqset_seed.html">dqset_seed</a></span><span class="op">(</span><span class="fl">1623L</span><span class="op">)</span>
 <span class="fu">Rcpp_rerlang_DQRNG</span><span class="op">(</span><span class="fl">10</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>
-<span class="co">#&gt;  [1]  4.253946  6.632050  8.921737 10.021481  4.747156  9.107386  9.120729</span>
-<span class="co">#&gt;  [8] 10.079515  8.454977  4.264538</span></pre></div>
+<span class="co">#&gt;  [1]  3.401419  5.063018  4.915893 11.271596 14.128176  7.942866  8.195575</span>
+<span class="co">#&gt;  [8]  2.825962 12.446754  3.054656</span></pre></div>
 </div>
 <div id="benchmark" class="section level2">
 <h2 class="hasAnchor">
