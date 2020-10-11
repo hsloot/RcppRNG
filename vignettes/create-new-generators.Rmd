@@ -41,7 +41,7 @@ packages `RcppRNG` (for obvious reasons) as well as `dqrng`, `BH`, and `sitmo` (
 
 ```{Rcpp Erlang-setup, eval=FALSE}
 #include <Rcpp.h>
-// [[Rcpp::plugins("cpp17")]]
+// [[Rcpp::plugins("cpp14")]]
 // [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
 #include <RcppRNG.hpp>
@@ -174,7 +174,7 @@ Rcpp_rerlang_DQRNG(10, 3, 0.5)
 ```
 
 
-## Benchmark 
+## Benchmark
 
 ```{r Bernchmark-Erlang-generator}
 n <- 1e5L
@@ -188,4 +188,3 @@ bm <- bench::mark(
 )
 ggplot2::autoplot(bm)
 ```
-

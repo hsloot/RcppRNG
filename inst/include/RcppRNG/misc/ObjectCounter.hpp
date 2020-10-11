@@ -13,16 +13,28 @@ namespace misc {
 template <typename _Tp>
 class ObjectCounter {
  public:
-  ObjectCounter();
-  ObjectCounter(const ObjectCounter& other);
-  ObjectCounter(ObjectCounter&& other) noexcept;
+  ObjectCounter() {
+    ++total_;
+  }
+  ObjectCounter(
+      const ObjectCounter<_Tp>& other) {
+    if (this != &other) ++total_;
+  }
+  ObjectCounter(ObjectCounter&& other) noexcept = default;
 
-  ~ObjectCounter();
+  ~ObjectCounter() {
+    --total_;
+  }
 
-  ObjectCounter& operator=(const ObjectCounter& other);
-  ObjectCounter& operator=(ObjectCounter&& other) noexcept ;
+  ObjectCounter& operator=(
+      const ObjectCounter<_Tp>& other) {
+    ++total_;
+  }
+  ObjectCounter& operator=(ObjectCounter&& other) noexcept = default;
 
-  static auto OutstandingObjects();
+  static std::size_t OutstandingObjects() {
+    return total_;
+  }
 
  private:
   static std::size_t total_;
@@ -31,7 +43,5 @@ class ObjectCounter {
 } // namespace misc
 
 }  // namespace RcppRNG
-
-#include <RcppRNG/misc/impl/ObjectCounter.ipp>
 
 #endif  // RCPPRNG_MISC_OBJECTCOUNTER_HPP
