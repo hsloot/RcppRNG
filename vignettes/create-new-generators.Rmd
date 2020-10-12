@@ -57,73 +57,101 @@ namespace RcppRNG {
 
 namespace distribution {
 
-template<typename _IntType, typename _RealType, typename _ExponentialDistributionType>
+namespace erlang {
+
+template <typename _IntType, typename _RealType>
+void check_params(const _IntType shape, const _RealType lambda) {
+  static_assert(std::is_integral<_IntType>::value,
+                "_IntType not integral type");
+  static_assert(std::is_floating_point<_RealType>::value,
+                "_RealType not floating point number");
+  static_assert(std::numeric_limits<_RealType>::is_iec559,
+                "_RealType not IEEE 754");
+  if (!(0 < shape)) throw std::range_error("shape not > 0");
+  if (!(0. <= lambda && lambda <= std::numeric_limits<_RealType>::infinity()))
+    throw std::range_error("lambda not in [0, infty]");
+}
+
+}  // namespace erlang
+
+template <typename _IntType, typename _RealType,
+          typename _ExponentialDistributionType>
 class erlang_distribution {
-public:
-  using output_type = _RealType;
-  struct input_type {
-    using shape_type = _IntType;
-    using lambda_type = _RealType;
-  };
+ public:
+  using result_type = _RealType;
 
   class param_type {
    public:
-    explicit param_type(const _IntType shape = _IntType(1), const _RealType lambda = _RealType(1.)) : shape_{shape}, exponential_distribution_{lambda} {}
+    explicit param_type(const _IntType shape = _IntType{1},
+                        const _RealType lambda = _RealType{1.})
+        : shape_{shape}, lambda_{lambda} {
+      erlang::check_params(shape_, lambda_);
+    }
 
     // compiler generated ctor and assignment op is sufficient
 
-    _IntType shape() const {
-      return shape_;
-    }
+    _IntType shape() const { return shape_; }
 
-    _RealType lambda() const {
-      return exponential_distribution_.params().lambda();
-    }
-
-    template <typename _EngineType>
-    typename _ExponentialDistributionType::output_type
-    exponential_distribution(_EngineType&& engine) {
-      return exponential_distribution_(engine);
-    }
+    _RealType lambda() const { return lambda_; }
 
    private:
     _IntType shape_;
-    _ExponentialDistributionType exponential_distribution_;
+    _RealType lambda_;
   };
 
-  explicit erlang_distribution(const _IntType shape = _IntType(1), const _RealType rate = _RealType(1.)) : params_(shape, rate) {}
+  explicit erlang_distribution(const _IntType shape = _IntType{1},
+                               const _RealType lambda = _RealType{1.})
+      : shape_{shape}, exponential_distribution_{lambda} {
+    erlang::check_params(shape_, exponential_distribution_.lambda());
+  }
 
-  explicit erlang_distribution(const param_type& params) : params_(params) {}
+  explicit erlang_distribution(const param_type& params)
+      : shape_(params.shape()), exponential_distribution_(params.lambda()) {}
 
   // compiler generated ctor and assignment op is sufficient
 
   param_type params() const {
-    return params_;
+    return param_type(shape_, exponential_distribution_.lambda());
   }
 
   void params(const param_type& params) {
-    params_ = params;
+    shape_ = params.shape();
+    exponential_distribution_.params(params.lambda());
   }
 
+  _IntType shape() const { return shape_; }
+
+  _RealType lambda() const { return exponential_distribution_.lambda(); }
+
   template <typename _EngineType>
-  _RealType operator()(_EngineType&& engine) {
-    _RealType out = _RealType(0.);
-    for (_IntType j=_IntType(1); j<=params_.shape(); ++j) out += params_.exponential_distribution(
-               std::forward<_EngineType>(engine));
+  result_type operator()(_EngineType&& engine) {
+    result_type out = _RealType(0.);
+    for (_IntType j = _IntType(1); j <= shape_; ++j)
+      out += exponential_distribution_(std::forward<_EngineType>(engine));
 
     return out;
   }
 
-private:
-  param_type params_;
-}; // erlang_distribution
+  template <typename _EngineType>
+  result_type operator()(_EngineType&& engine, const param_type& params) {
+    return typename param_type::distribution_type{params}(
+        std::forward<_EngineType>(engine));
+  }
 
-} // namespace distribution
+ private:
+  _IntType shape_;
+  _ExponentialDistributionType exponential_distribution_;
+};  // erlang_distribution
 
-template<typename _IntType, typename _RealType, typename _ExponentialDistributionType>
-using erlang_distribution = distribution::erlang_distribution<_IntType, _RealType, _ExponentialDistributionType>;
+}  // namespace distribution
 
-} // namespace RcppRNG
+template <typename _IntType, typename _RealType,
+          typename _ExponentialDistributionType>
+using erlang_distribution =
+    distribution::erlang_distribution<_IntType, _RealType,
+                                      _ExponentialDistributionType>;
+
+}  // namespace RcppRNG
 ```
 
 

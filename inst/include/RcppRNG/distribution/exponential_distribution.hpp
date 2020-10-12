@@ -10,85 +10,80 @@ namespace RcppRNG {
 
 namespace distribution {
 
+namespace exponential {
+
+template <typename _RealType>
+void check_params(const _RealType lambda) {
+  static_assert(std::is_floating_point<_RealType>::value,
+                "_RealType not floating point number");
+  static_assert(std::numeric_limits<_RealType>::is_iec559,
+                "_RealType not IEEE 754");
+  if (!(0. <= lambda && lambda <= std::numeric_limits<_RealType>::infinity()))
+    throw std::range_error("lambda not in [0, infty]");
+}
+
+}  // namespace exponential
+
 template <typename _RealType = double,
           typename _UnitExponentialDistributionType =
               unit_exponential_distribution<_RealType>>
 class exponential_distribution {
  public:
-  using input_type = _RealType;
-  using output_type = _RealType;
+  using result_type = _RealType;
 
   class param_type {
    public:
     using distribution_type = exponential_distribution;
 
-    param_type(_RealType lambda = _RealType(1.))
-        : lambda_{lambda}, unit_exponential_distribution_{} {
-      check_params();
+    param_type(_RealType lambda = _RealType{1.}) : lambda_{lambda} {
+      exponential::check_params(lambda);
     }
 
     // compiler generated ctor and assignment op is sufficient
 
-    static _RealType min() { return _RealType(0.); }
-
-    static _RealType max() {
-      return std::numeric_limits<_RealType>::infinity();
-    }
-
     _RealType lambda() const { return lambda_; }
-
-    template <typename _EngineType>
-    typename _UnitExponentialDistributionType::output_type
-    unit_exponential_distribution(_EngineType&& engine) {
-      return unit_exponential_distribution_(engine);
-    }
 
    private:
     _RealType lambda_;
-    _UnitExponentialDistributionType unit_exponential_distribution_;
-
-    void check_params() {
-      if (lambda_ < min() || lambda_ > max())
-        throw std::range_error("lambda out of range");
-    }
   };
 
-  explicit exponential_distribution(_RealType rate = _RealType(1.))
-      : params_{rate} {}
+  explicit exponential_distribution(_RealType lambda = _RealType{1.})
+      : lambda_{lambda}, unit_exponential_distribution_{} {
+    exponential::check_params(lambda_);
+  }
 
   explicit exponential_distribution(const param_type& params)
-      : params_(params) {}
+      : lambda_{params.lambda()}, unit_exponential_distribution_{} {}
 
   // compiler generated ctor and assignment op is sufficient
 
-  param_type params() const {
-    return params_;
-  }
+  static _RealType min() { return _RealType{0.}; }
 
-  void params(const param_type& params) {
-    params_ = params;
+  static _RealType max() { return std::numeric_limits<_RealType>::infinity(); }
+
+  param_type params() const { return param_type{lambda_}; }
+
+  void params(const param_type& params) { lambda_ = params.lambda(); }
+
+  _RealType lambda() const { return lambda_; }
+
+  void reset() {}
+
+  template <typename _EngineType>
+  result_type operator()(_EngineType&& engine) {
+    return unit_exponential_distribution_(std::forward<_EngineType>(engine)) /
+           lambda_;
   }
 
   template <typename _EngineType>
-  _RealType operator()(_EngineType&& engine) {
-    return (*this)(params_.lambda(), std::forward<_EngineType>(engine));
+  result_type operator()(_EngineType&& engine, const param_type& params) {
+    return typename param_type::distribution_type{params}(
+        std::forward<_EngineType>(engine));
   }
-
-  template <typename _EngineType>
-  _RealType operator()(const _RealType& lambda, _EngineType&& engine) {
-    return params_.unit_exponential_distribution(
-               std::forward<_EngineType>(engine)) /
-           lambda;
-  }
-
-  friend bool operator==(const exponential_distribution& lhs,
-                         const exponential_distribution& rhs);
-
-  friend bool operator!=(const exponential_distribution& lhs,
-                         const exponential_distribution& rhs);
 
  private:
-  param_type params_;
+  _RealType lambda_;
+  _UnitExponentialDistributionType unit_exponential_distribution_;
 };  // exponential_distribution
 
 template <typename _RealType, typename _UnitExponentialDistributionType>
@@ -115,7 +110,7 @@ bool operator==(
         lhs,
     const exponential_distribution<_RealType, _UnitExponentialDistributionType>&
         rhs) {
-  return lhs.isEqual(rhs) && lhs.params_ != rhs.params_;
+  return lhs.isEqual(rhs) && lhs.params() != rhs.params();
 }
 
 template <typename _RealType, typename _UnitExponentialDistributionType>

@@ -101,9 +101,9 @@ similar in their performance.
     #> # A tibble: 3 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.19ms   5.83ms      170.  783.79KB     2.07
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)    3.9ms   4.41ms      221.    4.52MB     2.07
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms   4.36ms      224.  787.92KB     4.23
+    #> 1 rexp(1e+05, 0.5)                 6.87ms    9.2ms      107.  783.79KB     0   
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   4.52ms   6.76ms      140.    4.52MB     2.09
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.58ms   6.77ms      144.  787.92KB     2.06
 
 Why is that useful?
 -------------------
@@ -146,10 +146,10 @@ will be demonstrated in the following
     #> # A tibble: 4 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.25ms   6.06ms      162.     784KB     2.05
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.87ms   4.62ms      210.     784KB     2.06
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.65ms      211.     784KB     4.26
-    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.66ms   8.97ms      106.     784KB    45.9
+    #> 1 rexp(1e+05, 0.5)                 6.76ms   9.35ms     103.      784KB     0   
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   5.25ms   6.44ms     150.      784KB     2.08
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    5.45ms   7.52ms     123.      784KB     2.05
+    #> 4 Rcpp_rexp_slow(1e+05, 0.5)      12.92ms  19.02ms      51.0     784KB    22.3
 
 However, we can also use another random number generator (e.g. the one
 from `dqrng`):
@@ -214,11 +214,11 @@ from `dqrng`):
     #> # A tibble: 5 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.21ms   5.85ms      168.     784KB     2.05
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.85ms   4.33ms      222.     784KB     4.19
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.82ms   4.34ms      224.     784KB     4.22
-    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)       914µs   1.26ms      784.     781KB    13.7 
-    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       7.78ms   9.45ms      102.     784KB    42.8
+    #> 1 rexp(1e+05, 0.5)                 8.57ms   9.59ms     102.      784KB     2.00
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   5.79ms   6.98ms     142.      784KB     2.06
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    5.32ms   7.68ms     127.      784KB     2.09
+    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)      1.22ms   2.69ms     349.      781KB     4.39
+    #> 5 Rcpp_rexp_slow(1e+05, 0.5)      14.94ms     19ms      53.4     784KB    22.0
 
 The main benefit of this design is that it allows us to implement new
 sampling algorithms, which are based on basic generators (e.g. exp,
