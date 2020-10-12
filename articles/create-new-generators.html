@@ -104,73 +104,101 @@
 <span id="cb2-2"><a href="#cb2-2"></a></span>
 <span id="cb2-3"><a href="#cb2-3"></a><span class="kw">namespace</span> distribution {</span>
 <span id="cb2-4"><a href="#cb2-4"></a></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType, <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">class</span> erlang_distribution {</span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">public</span>:</span>
-<span id="cb2-8"><a href="#cb2-8"></a>  <span class="kw">using</span> <span class="dt">output_type</span> = _RealType;</span>
-<span id="cb2-9"><a href="#cb2-9"></a>  <span class="kw">struct</span> <span class="dt">input_type</span> {</span>
-<span id="cb2-10"><a href="#cb2-10"></a>    <span class="kw">using</span> <span class="dt">shape_type</span> = _IntType;</span>
-<span id="cb2-11"><a href="#cb2-11"></a>    <span class="kw">using</span> <span class="dt">lambda_type</span> = _RealType;</span>
-<span id="cb2-12"><a href="#cb2-12"></a>  };</span>
-<span id="cb2-13"><a href="#cb2-13"></a></span>
-<span id="cb2-14"><a href="#cb2-14"></a>  <span class="kw">class</span> <span class="dt">param_type</span> {</span>
-<span id="cb2-15"><a href="#cb2-15"></a>   <span class="kw">public</span>:</span>
-<span id="cb2-16"><a href="#cb2-16"></a>    <span class="kw">explicit</span> <span class="dt">param_type</span>(<span class="at">const</span> _IntType shape = _IntType(<span class="dv">1</span>), <span class="at">const</span> _RealType lambda = _RealType(<span class="fl">1.</span>)) : <span class="va">shape_</span>{shape}, <span class="va">exponential_distribution_</span>{lambda} {}</span>
-<span id="cb2-17"><a href="#cb2-17"></a></span>
-<span id="cb2-18"><a href="#cb2-18"></a>    <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">namespace</span> erlang {</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">template</span> &lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType&gt;</span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="dt">void</span> check_params(<span class="at">const</span> _IntType shape, <span class="at">const</span> _RealType lambda) {</span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>is_integral&lt;_IntType&gt;::value,</span>
+<span id="cb2-10"><a href="#cb2-10"></a>                <span class="st">"_IntType not integral type"</span>);</span>
+<span id="cb2-11"><a href="#cb2-11"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>is_floating_point&lt;_RealType&gt;::value,</span>
+<span id="cb2-12"><a href="#cb2-12"></a>                <span class="st">"_RealType not floating point number"</span>);</span>
+<span id="cb2-13"><a href="#cb2-13"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>numeric_limits&lt;_RealType&gt;::is_iec559,</span>
+<span id="cb2-14"><a href="#cb2-14"></a>                <span class="st">"_RealType not IEEE 754"</span>);</span>
+<span id="cb2-15"><a href="#cb2-15"></a>  <span class="cf">if</span> (!(<span class="dv">0</span> &lt; shape)) <span class="cf">throw</span> <span class="bu">std::</span>range_error(<span class="st">"shape not &gt; 0"</span>);</span>
+<span id="cb2-16"><a href="#cb2-16"></a>  <span class="cf">if</span> (!(<span class="fl">0.</span> &lt;= lambda &amp;&amp; lambda &lt;= <span class="bu">std::</span>numeric_limits&lt;_RealType&gt;::infinity()))</span>
+<span id="cb2-17"><a href="#cb2-17"></a>    <span class="cf">throw</span> <span class="bu">std::</span>range_error(<span class="st">"lambda not in [0, infty]"</span>);</span>
+<span id="cb2-18"><a href="#cb2-18"></a>}</span>
 <span id="cb2-19"><a href="#cb2-19"></a></span>
-<span id="cb2-20"><a href="#cb2-20"></a>    _IntType shape() <span class="at">const</span> {</span>
-<span id="cb2-21"><a href="#cb2-21"></a>      <span class="cf">return</span> <span class="va">shape_</span>;</span>
-<span id="cb2-22"><a href="#cb2-22"></a>    }</span>
-<span id="cb2-23"><a href="#cb2-23"></a></span>
-<span id="cb2-24"><a href="#cb2-24"></a>    _RealType lambda() <span class="at">const</span> {</span>
-<span id="cb2-25"><a href="#cb2-25"></a>      <span class="cf">return</span> <span class="va">exponential_distribution_</span>.params().lambda();</span>
-<span id="cb2-26"><a href="#cb2-26"></a>    }</span>
+<span id="cb2-20"><a href="#cb2-20"></a>}  <span class="co">// namespace erlang</span></span>
+<span id="cb2-21"><a href="#cb2-21"></a></span>
+<span id="cb2-22"><a href="#cb2-22"></a><span class="kw">template</span> &lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType,</span>
+<span id="cb2-23"><a href="#cb2-23"></a>          <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
+<span id="cb2-24"><a href="#cb2-24"></a><span class="kw">class</span> erlang_distribution {</span>
+<span id="cb2-25"><a href="#cb2-25"></a> <span class="kw">public</span>:</span>
+<span id="cb2-26"><a href="#cb2-26"></a>  <span class="kw">using</span> <span class="dt">result_type</span> = _RealType;</span>
 <span id="cb2-27"><a href="#cb2-27"></a></span>
-<span id="cb2-28"><a href="#cb2-28"></a>    <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
-<span id="cb2-29"><a href="#cb2-29"></a>    <span class="kw">typename</span> _ExponentialDistributionType::<span class="dt">output_type</span></span>
-<span id="cb2-30"><a href="#cb2-30"></a>    exponential_distribution(_EngineType&amp;&amp; engine) {</span>
-<span id="cb2-31"><a href="#cb2-31"></a>      <span class="cf">return</span> <span class="va">exponential_distribution_</span>(engine);</span>
-<span id="cb2-32"><a href="#cb2-32"></a>    }</span>
-<span id="cb2-33"><a href="#cb2-33"></a></span>
-<span id="cb2-34"><a href="#cb2-34"></a>   <span class="kw">private</span>:</span>
-<span id="cb2-35"><a href="#cb2-35"></a>    _IntType <span class="va">shape_</span>;</span>
-<span id="cb2-36"><a href="#cb2-36"></a>    _ExponentialDistributionType <span class="va">exponential_distribution_</span>;</span>
-<span id="cb2-37"><a href="#cb2-37"></a>  };</span>
-<span id="cb2-38"><a href="#cb2-38"></a></span>
-<span id="cb2-39"><a href="#cb2-39"></a>  <span class="kw">explicit</span> erlang_distribution(<span class="at">const</span> _IntType shape = _IntType(<span class="dv">1</span>), <span class="at">const</span> _RealType rate = _RealType(<span class="fl">1.</span>)) : <span class="va">params_</span>(shape, rate) {}</span>
-<span id="cb2-40"><a href="#cb2-40"></a></span>
-<span id="cb2-41"><a href="#cb2-41"></a>  <span class="kw">explicit</span> erlang_distribution(<span class="at">const</span> <span class="dt">param_type</span>&amp; params) : <span class="va">params_</span>(params) {}</span>
-<span id="cb2-42"><a href="#cb2-42"></a></span>
-<span id="cb2-43"><a href="#cb2-43"></a>  <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
-<span id="cb2-44"><a href="#cb2-44"></a></span>
-<span id="cb2-45"><a href="#cb2-45"></a>  <span class="dt">param_type</span> params() <span class="at">const</span> {</span>
-<span id="cb2-46"><a href="#cb2-46"></a>    <span class="cf">return</span> <span class="va">params_</span>;</span>
-<span id="cb2-47"><a href="#cb2-47"></a>  }</span>
-<span id="cb2-48"><a href="#cb2-48"></a></span>
-<span id="cb2-49"><a href="#cb2-49"></a>  <span class="dt">void</span> params(<span class="at">const</span> <span class="dt">param_type</span>&amp; params) {</span>
-<span id="cb2-50"><a href="#cb2-50"></a>    <span class="va">params_</span> = params;</span>
+<span id="cb2-28"><a href="#cb2-28"></a>  <span class="kw">class</span> <span class="dt">param_type</span> {</span>
+<span id="cb2-29"><a href="#cb2-29"></a>   <span class="kw">public</span>:</span>
+<span id="cb2-30"><a href="#cb2-30"></a>    <span class="kw">explicit</span> <span class="dt">param_type</span>(<span class="at">const</span> _IntType shape = _IntType{<span class="dv">1</span>},</span>
+<span id="cb2-31"><a href="#cb2-31"></a>                        <span class="at">const</span> _RealType lambda = _RealType{<span class="fl">1.</span>})</span>
+<span id="cb2-32"><a href="#cb2-32"></a>        : <span class="va">shape_</span>{shape}, <span class="va">lambda_</span>{lambda} {</span>
+<span id="cb2-33"><a href="#cb2-33"></a>      erlang::check_params(<span class="va">shape_</span>, <span class="va">lambda_</span>);</span>
+<span id="cb2-34"><a href="#cb2-34"></a>    }</span>
+<span id="cb2-35"><a href="#cb2-35"></a></span>
+<span id="cb2-36"><a href="#cb2-36"></a>    <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
+<span id="cb2-37"><a href="#cb2-37"></a></span>
+<span id="cb2-38"><a href="#cb2-38"></a>    _IntType shape() <span class="at">const</span> { <span class="cf">return</span> <span class="va">shape_</span>; }</span>
+<span id="cb2-39"><a href="#cb2-39"></a></span>
+<span id="cb2-40"><a href="#cb2-40"></a>    _RealType lambda() <span class="at">const</span> { <span class="cf">return</span> <span class="va">lambda_</span>; }</span>
+<span id="cb2-41"><a href="#cb2-41"></a></span>
+<span id="cb2-42"><a href="#cb2-42"></a>   <span class="kw">private</span>:</span>
+<span id="cb2-43"><a href="#cb2-43"></a>    _IntType <span class="va">shape_</span>;</span>
+<span id="cb2-44"><a href="#cb2-44"></a>    _RealType <span class="va">lambda_</span>;</span>
+<span id="cb2-45"><a href="#cb2-45"></a>  };</span>
+<span id="cb2-46"><a href="#cb2-46"></a></span>
+<span id="cb2-47"><a href="#cb2-47"></a>  <span class="kw">explicit</span> erlang_distribution(<span class="at">const</span> _IntType shape = _IntType{<span class="dv">1</span>},</span>
+<span id="cb2-48"><a href="#cb2-48"></a>                               <span class="at">const</span> _RealType lambda = _RealType{<span class="fl">1.</span>})</span>
+<span id="cb2-49"><a href="#cb2-49"></a>      : <span class="va">shape_</span>{shape}, <span class="va">exponential_distribution_</span>{lambda} {</span>
+<span id="cb2-50"><a href="#cb2-50"></a>    erlang::check_params(<span class="va">shape_</span>, <span class="va">exponential_distribution_</span>.lambda());</span>
 <span id="cb2-51"><a href="#cb2-51"></a>  }</span>
 <span id="cb2-52"><a href="#cb2-52"></a></span>
-<span id="cb2-53"><a href="#cb2-53"></a>  <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
-<span id="cb2-54"><a href="#cb2-54"></a>  _RealType <span class="kw">operator</span>()(_EngineType&amp;&amp; engine) {</span>
-<span id="cb2-55"><a href="#cb2-55"></a>    _RealType out = _RealType(<span class="fl">0.</span>);</span>
-<span id="cb2-56"><a href="#cb2-56"></a>    <span class="cf">for</span> (_IntType j=_IntType(<span class="dv">1</span>); j&lt;=<span class="va">params_</span>.shape(); ++j) out += <span class="va">params_</span>.exponential_distribution(</span>
-<span id="cb2-57"><a href="#cb2-57"></a>               <span class="bu">std::</span>forward&lt;_EngineType&gt;(engine));</span>
-<span id="cb2-58"><a href="#cb2-58"></a></span>
-<span id="cb2-59"><a href="#cb2-59"></a>    <span class="cf">return</span> out;</span>
+<span id="cb2-53"><a href="#cb2-53"></a>  <span class="kw">explicit</span> erlang_distribution(<span class="at">const</span> <span class="dt">param_type</span>&amp; params)</span>
+<span id="cb2-54"><a href="#cb2-54"></a>      : <span class="va">shape_</span>(params.shape()), <span class="va">exponential_distribution_</span>(params.lambda()) {}</span>
+<span id="cb2-55"><a href="#cb2-55"></a></span>
+<span id="cb2-56"><a href="#cb2-56"></a>  <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
+<span id="cb2-57"><a href="#cb2-57"></a></span>
+<span id="cb2-58"><a href="#cb2-58"></a>  <span class="dt">param_type</span> params() <span class="at">const</span> {</span>
+<span id="cb2-59"><a href="#cb2-59"></a>    <span class="cf">return</span> <span class="dt">param_type</span>(<span class="va">shape_</span>, <span class="va">exponential_distribution_</span>.lambda());</span>
 <span id="cb2-60"><a href="#cb2-60"></a>  }</span>
 <span id="cb2-61"><a href="#cb2-61"></a></span>
-<span id="cb2-62"><a href="#cb2-62"></a><span class="kw">private</span>:</span>
-<span id="cb2-63"><a href="#cb2-63"></a>  <span class="dt">param_type</span> <span class="va">params_</span>;</span>
-<span id="cb2-64"><a href="#cb2-64"></a>}; <span class="co">// erlang_distribution</span></span>
-<span id="cb2-65"><a href="#cb2-65"></a></span>
-<span id="cb2-66"><a href="#cb2-66"></a>} <span class="co">// namespace distribution</span></span>
-<span id="cb2-67"><a href="#cb2-67"></a></span>
-<span id="cb2-68"><a href="#cb2-68"></a><span class="kw">template</span>&lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType, <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
-<span id="cb2-69"><a href="#cb2-69"></a><span class="kw">using</span> erlang_distribution = distribution::erlang_distribution&lt;_IntType, _RealType, _ExponentialDistributionType&gt;;</span>
+<span id="cb2-62"><a href="#cb2-62"></a>  <span class="dt">void</span> params(<span class="at">const</span> <span class="dt">param_type</span>&amp; params) {</span>
+<span id="cb2-63"><a href="#cb2-63"></a>    <span class="va">shape_</span> = params.shape();</span>
+<span id="cb2-64"><a href="#cb2-64"></a>    <span class="va">exponential_distribution_</span>.params(params.lambda());</span>
+<span id="cb2-65"><a href="#cb2-65"></a>  }</span>
+<span id="cb2-66"><a href="#cb2-66"></a></span>
+<span id="cb2-67"><a href="#cb2-67"></a>  _IntType shape() <span class="at">const</span> { <span class="cf">return</span> <span class="va">shape_</span>; }</span>
+<span id="cb2-68"><a href="#cb2-68"></a></span>
+<span id="cb2-69"><a href="#cb2-69"></a>  _RealType lambda() <span class="at">const</span> { <span class="cf">return</span> <span class="va">exponential_distribution_</span>.lambda(); }</span>
 <span id="cb2-70"><a href="#cb2-70"></a></span>
-<span id="cb2-71"><a href="#cb2-71"></a>} <span class="co">// namespace RcppRNG</span></span></code></pre></div>
+<span id="cb2-71"><a href="#cb2-71"></a>  <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
+<span id="cb2-72"><a href="#cb2-72"></a>  <span class="dt">result_type</span> <span class="kw">operator</span>()(_EngineType&amp;&amp; engine) {</span>
+<span id="cb2-73"><a href="#cb2-73"></a>    <span class="dt">result_type</span> out = _RealType(<span class="fl">0.</span>);</span>
+<span id="cb2-74"><a href="#cb2-74"></a>    <span class="cf">for</span> (_IntType j = _IntType(<span class="dv">1</span>); j &lt;= <span class="va">shape_</span>; ++j)</span>
+<span id="cb2-75"><a href="#cb2-75"></a>      out += <span class="va">exponential_distribution_</span>(<span class="bu">std::</span>forward&lt;_EngineType&gt;(engine));</span>
+<span id="cb2-76"><a href="#cb2-76"></a></span>
+<span id="cb2-77"><a href="#cb2-77"></a>    <span class="cf">return</span> out;</span>
+<span id="cb2-78"><a href="#cb2-78"></a>  }</span>
+<span id="cb2-79"><a href="#cb2-79"></a></span>
+<span id="cb2-80"><a href="#cb2-80"></a>  <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
+<span id="cb2-81"><a href="#cb2-81"></a>  <span class="dt">result_type</span> <span class="kw">operator</span>()(_EngineType&amp;&amp; engine, <span class="at">const</span> <span class="dt">param_type</span>&amp; params) {</span>
+<span id="cb2-82"><a href="#cb2-82"></a>    <span class="cf">return</span> <span class="kw">typename</span> <span class="dt">param_type</span>::<span class="dt">distribution_type</span>{params}(</span>
+<span id="cb2-83"><a href="#cb2-83"></a>        <span class="bu">std::</span>forward&lt;_EngineType&gt;(engine));</span>
+<span id="cb2-84"><a href="#cb2-84"></a>  }</span>
+<span id="cb2-85"><a href="#cb2-85"></a></span>
+<span id="cb2-86"><a href="#cb2-86"></a> <span class="kw">private</span>:</span>
+<span id="cb2-87"><a href="#cb2-87"></a>  _IntType <span class="va">shape_</span>;</span>
+<span id="cb2-88"><a href="#cb2-88"></a>  _ExponentialDistributionType <span class="va">exponential_distribution_</span>;</span>
+<span id="cb2-89"><a href="#cb2-89"></a>};  <span class="co">// erlang_distribution</span></span>
+<span id="cb2-90"><a href="#cb2-90"></a></span>
+<span id="cb2-91"><a href="#cb2-91"></a>}  <span class="co">// namespace distribution</span></span>
+<span id="cb2-92"><a href="#cb2-92"></a></span>
+<span id="cb2-93"><a href="#cb2-93"></a><span class="kw">template</span> &lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType,</span>
+<span id="cb2-94"><a href="#cb2-94"></a>          <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
+<span id="cb2-95"><a href="#cb2-95"></a><span class="kw">using</span> erlang_distribution =</span>
+<span id="cb2-96"><a href="#cb2-96"></a>    distribution::erlang_distribution&lt;_IntType, _RealType,</span>
+<span id="cb2-97"><a href="#cb2-97"></a>                                      _ExponentialDistributionType&gt;;</span>
+<span id="cb2-98"><a href="#cb2-98"></a></span>
+<span id="cb2-99"><a href="#cb2-99"></a>}  <span class="co">// namespace RcppRNG</span></span></code></pre></div>
 </div>
 <div id="rcpp-wrapper" class="section level3">
 <h3 class="hasAnchor">
