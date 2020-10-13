@@ -25,6 +25,8 @@ The goal of RcppRNG is to explore a templated implementation of Rcpp's internal
 generators for sampling. The motivation is to be able to write sampling routines
 that are based on native sampling routines (`rexp`, `runif`, ...) in a way that
 one can easily switch to an alternative RNG (e.g. `dqrng`).
+To achieve this, we borrow some design patterns from [__boost/random__](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_random.html) and enrich these with additional template arguments for distributions, which are central to 
+respective simulation strategies.
 
 ## Installation
 
@@ -61,7 +63,7 @@ using exponential_distribution =
 
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
+  NumericVector out{no_init(n)};
   Rcpp::RNGScope engine{};
   exponential_distribution exp{rate};
   std::generate(out.begin(), out.end(),
@@ -72,7 +74,7 @@ NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
 
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
+  NumericVector out{no_init(n)};
   RcppRNG::rng::RcppRNG engine{};
   exponential_distribution exp{rate};
   std::generate(out.begin(), out.end(),
@@ -110,7 +112,7 @@ since whenever one wants repeated single exponential samples inside the C++
 function, one could resort to
 
 ```{Rcpp,eval=FALSE}
-scale * R::exp_rand();
+scale * ::exp_rand();
 ```
 
 However, it is much more difficult, if you need repeated single samples from a
@@ -131,7 +133,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 NumericVector Rcpp_rexp_slow(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
+  NumericVector out{no_init(n)};
   for (R_xlen_t k=0; k<n; k++)
     out[k] = rexp(1, rate)[0];
 
@@ -166,7 +168,7 @@ using unit_exponential_distribution =
 using exponential_distribution =
     RcppRNG::exponential_distribution<double, unit_exponential_distribution>;
 
-RcppRNG::rng::DQRNG shared_dqrng = RcppRNG::rng::DQRNG();
+RcppRNG::rng::DQRNG shared_dqrng = RcppRNG::rng::DQRNG{};
 
 // [[Rcpp::export(rng=false)]]
 void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
@@ -181,7 +183,7 @@ void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> s
 
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
-  NumericVector out(no_init(n));
+  NumericVector out{no_init(n)};
   RcppRNG::rng::DQRNG engine{};
   exponential_distribution exp{rate};
   std::generate(out.begin(), out.end(),

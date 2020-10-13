@@ -18,7 +18,10 @@ The goal of RcppRNG is to explore a templated implementation of Rcpp’s
 internal generators for sampling. The motivation is to be able to write
 sampling routines that are based on native sampling routines (`rexp`,
 `runif`, …) in a way that one can easily switch to an alternative RNG
-(e.g. `dqrng`).
+(e.g. `dqrng`). To achieve this, we borrow some design patterns from
+[**boost/random**](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_random.html)
+and enrich these with additional template arguments for distributions,
+which are central to respective simulation strategies.
 
 Installation
 ------------
@@ -55,7 +58,7 @@ similar in their performance.
 
     // [[Rcpp::export(rng=false)]]
     NumericVector Rcpp_rexp_RNGScope(R_xlen_t n, double rate = 1.) {
-      NumericVector out(no_init(n));
+      NumericVector out{no_init(n)};
       Rcpp::RNGScope engine{};
       exponential_distribution exp{rate};
       std::generate(out.begin(), out.end(),
@@ -66,7 +69,7 @@ similar in their performance.
 
     // [[Rcpp::export(rng=false)]]
     NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
-      NumericVector out(no_init(n));
+      NumericVector out{no_init(n)};
       RcppRNG::rng::RcppRNG engine{};
       exponential_distribution exp{rate};
       std::generate(out.begin(), out.end(),
@@ -101,9 +104,9 @@ similar in their performance.
     #> # A tibble: 3 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.26ms   5.96ms      162.  783.79KB     2.06
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.44ms      219.    4.52MB     2.07
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.33ms      218.  787.92KB     4.27
+    #> 1 rexp(1e+05, 0.5)                  5.5ms   6.16ms      155.  783.79KB     2.07
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms    4.5ms      216.    4.52MB     2.08
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.37ms      219.  787.92KB     4.22
 
 Why is that useful?
 -------------------
@@ -112,7 +115,7 @@ For the exponential distribution, the problem is not that easy to
 motivate, since whenever one wants repeated single exponential samples
 inside the C++ function, one could resort to
 
-    scale * R::exp_rand();
+    scale * ::exp_rand();
 
 However, it is much more difficult, if you need repeated single samples
 from a discrete distribution (e.g. to sample the transitions in a Markov
@@ -129,7 +132,7 @@ will be demonstrated in the following
 
     // [[Rcpp::export]]
     NumericVector Rcpp_rexp_slow(R_xlen_t n, double rate = 1.) {
-      NumericVector out(no_init(n));
+      NumericVector out{no_init(n)};
       for (R_xlen_t k=0; k<n; k++)
         out[k] = rexp(1, rate)[0];
 
@@ -146,10 +149,10 @@ will be demonstrated in the following
     #> # A tibble: 4 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                  5.2ms   5.98ms      161.     784KB     2.07
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.96ms   4.87ms      207.     784KB     2.05
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.82ms      201.     784KB     4.27
-    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.64ms   9.19ms      102.     784KB    44.3
+    #> 1 rexp(1e+05, 0.5)                 5.28ms   6.38ms      157.     784KB     2.07
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.42ms      221.     784KB     2.06
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.78ms   4.65ms      205.     784KB     4.22
+    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.59ms   9.13ms      102.     784KB    44.0
 
 However, we can also use another random number generator (e.g. the one
 from `dqrng`):
@@ -168,7 +171,7 @@ from `dqrng`):
     using exponential_distribution =
         RcppRNG::exponential_distribution<double, unit_exponential_distribution>;
 
-    RcppRNG::rng::DQRNG shared_dqrng = RcppRNG::rng::DQRNG();
+    RcppRNG::rng::DQRNG shared_dqrng = RcppRNG::rng::DQRNG{};
 
     // [[Rcpp::export(rng=false)]]
     void dqset_seed2(Rcpp::IntegerVector seed, Rcpp::Nullable<Rcpp::IntegerVector> stream = R_NilValue) {
@@ -183,7 +186,7 @@ from `dqrng`):
 
     // [[Rcpp::export(rng=false)]]
     NumericVector Rcpp_rexp_DQRNG(R_xlen_t n, double rate = 1.) {
-      NumericVector out(no_init(n));
+      NumericVector out{no_init(n)};
       RcppRNG::rng::DQRNG engine{};
       exponential_distribution exp{rate};
       std::generate(out.begin(), out.end(),
@@ -214,11 +217,11 @@ from `dqrng`):
     #> # A tibble: 5 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.34ms   6.75ms      146.     784KB     2.08
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.64ms      209.     784KB     4.27
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.92ms   5.03ms      200.     784KB     2.06
-    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    909.64µs   1.41ms      691.     781KB    13.9 
-    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       7.68ms   9.42ms      103.     784KB    41.7
+    #> 1 rexp(1e+05, 0.5)                 5.24ms   6.18ms     161.      784KB     2.07
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.46ms     220.      784KB     4.19
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.45ms     219.      784KB     4.25
+    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    909.54µs    1.3ms     681.      781KB    11.5 
+    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.07ms   9.56ms      92.6     784KB    41.2
 
 The main benefit of this design is that it allows us to implement new
 sampling algorithms, which are based on basic generators (e.g. exp,
