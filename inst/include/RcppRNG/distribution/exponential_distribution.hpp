@@ -6,7 +6,6 @@
 #ifndef RCPPRNG_DISTRIBUTION_EXP_HPP
 #define RCPPRNG_DISTRIBUTION_EXP_HPP
 
-#include <Rcpp.h>
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
