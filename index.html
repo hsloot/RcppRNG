@@ -75,7 +75,7 @@
 <a href="#rcpprng" class="anchor"></a>RcppRNG</h1></div>
 <!-- badges: start -->
 
-<p>The goal of RcppRNG is to explore a templated implementation of Rcpp’s internal generators for sampling. The motivation is to be able to write sampling routines that are based on native sampling routines (<code>rexp</code>, <code>runif</code>, …) in a way that one can easily switch to an alternative RNG (e.g. <code>dqrng</code>).</p>
+<p>The goal of RcppRNG is to explore a templated implementation of Rcpp’s internal generators for sampling. The motivation is to be able to write sampling routines that are based on native sampling routines (<code>rexp</code>, <code>runif</code>, …) in a way that one can easily switch to an alternative RNG (e.g. <code>dqrng</code>). To achieve this, we borrow some design patterns from <a href="https://www.boost.org/doc/libs/1_74_0/doc/html/boost_random.html"><strong>boost/random</strong></a> and enrich these with additional template arguments for distributions, which are central to respective simulation strategies.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
@@ -102,7 +102,7 @@
 <span id="cb2-14"><a href="#cb2-14"></a></span>
 <span id="cb2-15"><a href="#cb2-15"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
 <span id="cb2-16"><a href="#cb2-16"></a>NumericVector <span class="kw">Rcpp_rexp_RNGScope</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb2-17"><a href="#cb2-17"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb2-17"><a href="#cb2-17"></a>  NumericVector out{<span class="kw">no_init</span>(n)};</span>
 <span id="cb2-18"><a href="#cb2-18"></a>  Rcpp<span class="op">::</span>RNGScope engine{};</span>
 <span id="cb2-19"><a href="#cb2-19"></a>  exponential_distribution exp{rate};</span>
 <span id="cb2-20"><a href="#cb2-20"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(),</span>
@@ -113,7 +113,7 @@
 <span id="cb2-25"><a href="#cb2-25"></a></span>
 <span id="cb2-26"><a href="#cb2-26"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
 <span id="cb2-27"><a href="#cb2-27"></a>NumericVector <span class="kw">Rcpp_rexp_RcppRNG</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb2-28"><a href="#cb2-28"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb2-28"><a href="#cb2-28"></a>  NumericVector out{<span class="kw">no_init</span>(n)};</span>
 <span id="cb2-29"><a href="#cb2-29"></a>  RcppRNG<span class="op">::</span>rng<span class="op">::</span>RcppRNG engine{};</span>
 <span id="cb2-30"><a href="#cb2-30"></a>  exponential_distribution exp{rate};</span>
 <span id="cb2-31"><a href="#cb2-31"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(),</span>
@@ -122,50 +122,55 @@
 <span id="cb2-34"><a href="#cb2-34"></a>  return out;</span>
 <span id="cb2-35"><a href="#cb2-35"></a>}</span>
 <span id="cb2-36"><a href="#cb2-36"></a></span>
-<span id="cb2-37"><a href="#cb2-37"></a>use_seed &lt;-<span class="st"> </span>1623L</span>
-<span id="cb2-38"><a href="#cb2-38"></a></span>
-<span id="cb2-39"><a href="#cb2-39"></a><span class="kw">set.seed</span>(use_seed)</span>
-<span id="cb2-40"><a href="#cb2-40"></a><span class="kw">rexp</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
-<span id="cb2-41"><a href="#cb2-41"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
-<span id="cb2-42"><a href="#cb2-42"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
-<span id="cb2-43"><a href="#cb2-43"></a></span>
-<span id="cb2-44"><a href="#cb2-44"></a><span class="kw">set.seed</span>(use_seed)</span>
-<span id="cb2-45"><a href="#cb2-45"></a><span class="kw">Rcpp_rexp_RNGScope</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
-<span id="cb2-46"><a href="#cb2-46"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
-<span id="cb2-47"><a href="#cb2-47"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
-<span id="cb2-48"><a href="#cb2-48"></a></span>
-<span id="cb2-49"><a href="#cb2-49"></a><span class="kw">set.seed</span>(use_seed)</span>
-<span id="cb2-50"><a href="#cb2-50"></a><span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="dv">10</span>, <span class="fl">0.5</span>)</span>
-<span id="cb2-51"><a href="#cb2-51"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
-<span id="cb2-52"><a href="#cb2-52"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
-<span id="cb2-53"><a href="#cb2-53"></a></span>
-<span id="cb2-54"><a href="#cb2-54"></a>bench<span class="op">::</span><span class="kw">mark</span>(</span>
-<span id="cb2-55"><a href="#cb2-55"></a>  <span class="kw">rexp</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb2-56"><a href="#cb2-56"></a>  <span class="kw">Rcpp_rexp_RNGScope</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb2-57"><a href="#cb2-57"></a>  <span class="kw">Rcpp_rexp_RcppRNG</span>(<span class="fl">1e5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb2-58"><a href="#cb2-58"></a>  <span class="dt">check=</span><span class="ot">FALSE</span></span>
-<span id="cb2-59"><a href="#cb2-59"></a>)</span>
-<span id="cb2-60"><a href="#cb2-60"></a><span class="co">#&gt; # A tibble: 3 x 6</span></span>
-<span id="cb2-61"><a href="#cb2-61"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
-<span id="cb2-62"><a href="#cb2-62"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb2-63"><a href="#cb2-63"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.26ms   5.96ms      162.  783.79KB     2.06</span></span>
-<span id="cb2-64"><a href="#cb2-64"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.44ms      219.    4.52MB     2.07</span></span>
-<span id="cb2-65"><a href="#cb2-65"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.33ms      218.  787.92KB     4.27</span></span></code></pre></div>
+<span id="cb2-37"><a href="#cb2-37"></a>n &lt;-<span class="st"> </span><span class="fl">1e1</span>L</span>
+<span id="cb2-38"><a href="#cb2-38"></a>lambda &lt;-<span class="st"> </span><span class="fl">0.5</span></span>
+<span id="cb2-39"><a href="#cb2-39"></a>use_seed &lt;-<span class="st"> </span>1623L</span>
+<span id="cb2-40"><a href="#cb2-40"></a></span>
+<span id="cb2-41"><a href="#cb2-41"></a><span class="kw">set.seed</span>(use_seed)</span>
+<span id="cb2-42"><a href="#cb2-42"></a><span class="kw">rexp</span>(n, <span class="dt">rate=</span>lambda)</span>
+<span id="cb2-43"><a href="#cb2-43"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
+<span id="cb2-44"><a href="#cb2-44"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-45"><a href="#cb2-45"></a></span>
+<span id="cb2-46"><a href="#cb2-46"></a><span class="kw">set.seed</span>(use_seed)</span>
+<span id="cb2-47"><a href="#cb2-47"></a><span class="kw">Rcpp_rexp_RNGScope</span>(n, <span class="dt">rate=</span>lambda)</span>
+<span id="cb2-48"><a href="#cb2-48"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
+<span id="cb2-49"><a href="#cb2-49"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-50"><a href="#cb2-50"></a></span>
+<span id="cb2-51"><a href="#cb2-51"></a><span class="kw">set.seed</span>(use_seed)</span>
+<span id="cb2-52"><a href="#cb2-52"></a><span class="kw">Rcpp_rexp_RcppRNG</span>(n, <span class="dt">rate=</span>lambda)</span>
+<span id="cb2-53"><a href="#cb2-53"></a><span class="co">#&gt;  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103</span></span>
+<span id="cb2-54"><a href="#cb2-54"></a><span class="co">#&gt;  [8] 3.2669849 0.1426958 4.6437262</span></span>
+<span id="cb2-55"><a href="#cb2-55"></a></span>
+<span id="cb2-56"><a href="#cb2-56"></a></span>
+<span id="cb2-57"><a href="#cb2-57"></a>n &lt;-<span class="st"> </span><span class="fl">1e5</span>L</span>
+<span id="cb2-58"><a href="#cb2-58"></a>bench<span class="op">::</span><span class="kw">mark</span>(</span>
+<span id="cb2-59"><a href="#cb2-59"></a>  <span class="kw">rexp</span>(n, <span class="dt">rate=</span>lambda),</span>
+<span id="cb2-60"><a href="#cb2-60"></a>  <span class="kw">Rcpp_rexp_RNGScope</span>(n, <span class="dt">rate=</span>lambda),</span>
+<span id="cb2-61"><a href="#cb2-61"></a>  <span class="kw">Rcpp_rexp_RcppRNG</span>(n, <span class="dt">rate=</span>lambda),</span>
+<span id="cb2-62"><a href="#cb2-62"></a>  <span class="dt">check=</span><span class="ot">FALSE</span></span>
+<span id="cb2-63"><a href="#cb2-63"></a>)</span>
+<span id="cb2-64"><a href="#cb2-64"></a><span class="co">#&gt; # A tibble: 3 x 6</span></span>
+<span id="cb2-65"><a href="#cb2-65"></a><span class="co">#&gt;   expression                              min median `itr/sec` mem_alloc</span></span>
+<span id="cb2-66"><a href="#cb2-66"></a><span class="co">#&gt;   &lt;bch:expr&gt;                           &lt;bch:&gt; &lt;bch:&gt;     &lt;dbl&gt; &lt;bch:byt&gt;</span></span>
+<span id="cb2-67"><a href="#cb2-67"></a><span class="co">#&gt; 1 rexp(n, rate = lambda)               5.33ms    6ms      156.  783.79KB</span></span>
+<span id="cb2-68"><a href="#cb2-68"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(n, rate = lambda) 3.83ms 4.33ms      223.    4.52MB</span></span>
+<span id="cb2-69"><a href="#cb2-69"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(n, rate = lambda)  3.83ms 4.38ms      222.  787.92KB</span></span>
+<span id="cb2-70"><a href="#cb2-70"></a><span class="co">#&gt; # … with 1 more variable: `gc/sec` &lt;dbl&gt;</span></span></code></pre></div>
 </div>
 <div id="why-is-that-useful" class="section level2">
 <h2 class="hasAnchor">
 <a href="#why-is-that-useful" class="anchor"></a>Why is that useful?</h2>
-<p>For the exponential distribution, the problem is not that easy to motivate, since whenever one wants repeated single exponential samples inside the C++ function, one could resort to</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>scale <span class="op">*</span><span class="st"> </span>R<span class="op">::</span><span class="kw">exp_rand</span>();</span></code></pre></div>
+<p>For the exponential distribution, obvious to see why this approach constitutes an improvement, since whenever one wants repeated single exponential samples inside the C++ function, one could resort to</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>scale <span class="op">*</span><span class="st"> </span><span class="er">::</span><span class="kw">exp_rand</span>(); <span class="op">/</span><span class="er">/</span><span class="st"> </span><span class="cf">in</span> R_ext<span class="op">/</span>Random.h</span></code></pre></div>
 <p>However, it is much more difficult, if you need repeated single samples from a discrete distribution (e.g. to sample the transitions in a Markov process). At his point you could do somethings like</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">sample</span>(n, <span class="dv">1</span>, false, probs, true)[<span class="dv">0</span>]; <span class="op">/</span><span class="er">/</span><span class="st"> </span>probs is NumericVector of size n</span></code></pre></div>
-<p>This, however, would construct a <code>NumericVector</code> object in each draw. This has a significant overhead. For the exponential distribution this will be demonstrated in the following</p>
+<p>However, this would construct a <code>NumericVector</code> object in each draw. This has a significant overhead. For the exponential distribution this will be demonstrated in the following</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#include &lt;Rcpp.h&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a>using namespace Rcpp;</span>
 <span id="cb5-3"><a href="#cb5-3"></a></span>
 <span id="cb5-4"><a href="#cb5-4"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span>export]]</span>
 <span id="cb5-5"><a href="#cb5-5"></a>NumericVector <span class="kw">Rcpp_rexp_slow</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb5-6"><a href="#cb5-6"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb5-6"><a href="#cb5-6"></a>  NumericVector out{<span class="kw">no_init</span>(n)};</span>
 <span id="cb5-7"><a href="#cb5-7"></a>  <span class="cf">for</span> (R_xlen_t <span class="dt">k=</span><span class="dv">0</span>; k<span class="op">&lt;</span>n; k<span class="op">++</span>)</span>
 <span id="cb5-8"><a href="#cb5-8"></a>    out[k] =<span class="st"> </span><span class="kw">rexp</span>(<span class="dv">1</span>, rate)[<span class="dv">0</span>];</span>
 <span id="cb5-9"><a href="#cb5-9"></a></span>
@@ -182,11 +187,12 @@
 <span id="cb5-20"><a href="#cb5-20"></a><span class="co">#&gt; # A tibble: 4 x 6</span></span>
 <span id="cb5-21"><a href="#cb5-21"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
 <span id="cb5-22"><a href="#cb5-22"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                  5.2ms   5.98ms      161.     784KB     2.07</span></span>
-<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.96ms   4.87ms      207.     784KB     2.05</span></span>
-<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.82ms      201.     784KB     4.27</span></span>
-<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       7.64ms   9.19ms      102.     784KB    44.3</span></span></code></pre></div>
-<p>However, we can also use another random number generator (e.g. the one from <code>dqrng</code>):</p>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                  5.2ms   5.71ms      172.     784KB     2.05</span></span>
+<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.48ms      215.     784KB     4.17</span></span>
+<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms    4.8ms      207.     784KB     2.07</span></span>
+<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       7.55ms   8.35ms      113.     784KB    49.3</span></span></code></pre></div>
+<p>Another problem is, that sampling algorithms might perform internal optimizations (in the case of <code>sample</code>, probability vectors are sorted), which would have to be repreated every time the function is called with the same parameters.</p>
+<p>Finally, we can also want touse another random number generator (e.g. the one from <code>dqrng</code>). This is easily possible with our design pattern without having to duplicate the algorithm.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#include &lt;Rcpp.h&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">plugins</span>(<span class="st">"cpp14"</span>)]]</span>
@@ -201,7 +207,7 @@
 <span id="cb6-12"><a href="#cb6-12"></a>using exponential_distribution =</span>
 <span id="cb6-13"><a href="#cb6-13"></a><span class="st">    </span>RcppRNG<span class="op">::</span>exponential_distribution<span class="op">&lt;</span>double, unit_exponential_distribution<span class="op">&gt;</span>;</span>
 <span id="cb6-14"><a href="#cb6-14"></a></span>
-<span id="cb6-15"><a href="#cb6-15"></a>RcppRNG<span class="op">::</span>rng<span class="op">::</span>DQRNG shared_dqrng =<span class="st"> </span>RcppRNG<span class="op">::</span>rng<span class="op">::</span><span class="kw">DQRNG</span>();</span>
+<span id="cb6-15"><a href="#cb6-15"></a>RcppRNG<span class="op">::</span>rng<span class="op">::</span>DQRNG shared_dqrng =<span class="st"> </span>RcppRNG<span class="op">::</span>rng<span class="op">::</span>DQRNG{};</span>
 <span id="cb6-16"><a href="#cb6-16"></a></span>
 <span id="cb6-17"><a href="#cb6-17"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
 <span id="cb6-18"><a href="#cb6-18"></a>void <span class="kw">dqset_seed2</span>(Rcpp<span class="op">::</span>IntegerVector seed, Rcpp<span class="op">::</span>Nullable<span class="op">&lt;</span>Rcpp<span class="op">::</span>IntegerVector<span class="op">&gt;</span><span class="st"> </span><span class="dt">stream =</span> R_NilValue) {</span>
@@ -216,7 +222,7 @@
 <span id="cb6-27"><a href="#cb6-27"></a></span>
 <span id="cb6-28"><a href="#cb6-28"></a><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[Rcpp<span class="op">::</span><span class="kw">export</span>(<span class="dt">rng=</span>false)]]</span>
 <span id="cb6-29"><a href="#cb6-29"></a>NumericVector <span class="kw">Rcpp_rexp_DQRNG</span>(R_xlen_t n, double <span class="dt">rate =</span> <span class="fl">1.</span>) {</span>
-<span id="cb6-30"><a href="#cb6-30"></a>  NumericVector <span class="kw">out</span>(<span class="kw">no_init</span>(n));</span>
+<span id="cb6-30"><a href="#cb6-30"></a>  NumericVector out{<span class="kw">no_init</span>(n)};</span>
 <span id="cb6-31"><a href="#cb6-31"></a>  RcppRNG<span class="op">::</span>rng<span class="op">::</span>DQRNG engine{};</span>
 <span id="cb6-32"><a href="#cb6-32"></a>  exponential_distribution exp{rate};</span>
 <span id="cb6-33"><a href="#cb6-33"></a>  std<span class="op">::</span><span class="kw">generate</span>(<span class="kw">out.begin</span>(), <span class="kw">out.end</span>(),</span>
@@ -247,11 +253,11 @@
 <span id="cb6-58"><a href="#cb6-58"></a><span class="co">#&gt; # A tibble: 5 x 6</span></span>
 <span id="cb6-59"><a href="#cb6-59"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
 <span id="cb6-60"><a href="#cb6-60"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb6-61"><a href="#cb6-61"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.34ms   6.75ms      146.     784KB     2.08</span></span>
-<span id="cb6-62"><a href="#cb6-62"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.64ms      209.     784KB     4.27</span></span>
-<span id="cb6-63"><a href="#cb6-63"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.92ms   5.03ms      200.     784KB     2.06</span></span>
-<span id="cb6-64"><a href="#cb6-64"></a><span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    909.64µs   1.41ms      691.     781KB    13.9 </span></span>
-<span id="cb6-65"><a href="#cb6-65"></a><span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       7.68ms   9.42ms      103.     784KB    41.7</span></span></code></pre></div>
+<span id="cb6-61"><a href="#cb6-61"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.17ms   5.67ms      172.     784KB     2.05</span></span>
+<span id="cb6-62"><a href="#cb6-62"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.81ms   4.32ms      215.     784KB     4.22</span></span>
+<span id="cb6-63"><a href="#cb6-63"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.81ms   4.27ms      225.     784KB     4.21</span></span>
+<span id="cb6-64"><a href="#cb6-64"></a><span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    887.39µs   1.23ms      792.     781KB    13.9 </span></span>
+<span id="cb6-65"><a href="#cb6-65"></a><span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       7.53ms   8.35ms      118.     784KB    49.4</span></span></code></pre></div>
 <p>The main benefit of this design is that it allows us to implement new sampling algorithms, which are based on basic generators (e.g. exp, unif, …) such that they can be used with the base R RNG or other RNG’s (e.g. dqrng’s). An example is described in a <a href="articles/create-new-generators.html">create new generators</a>.</p>
 </div>
 <div id="license" class="section level2">
