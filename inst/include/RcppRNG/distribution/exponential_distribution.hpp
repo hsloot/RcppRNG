@@ -14,10 +14,6 @@ namespace exponential {
 
 template <typename _RealType>
 void check_params(const _RealType lambda) {
-  static_assert(std::is_floating_point<_RealType>::value,
-                "_RealType not floating point number");
-  static_assert(std::numeric_limits<_RealType>::is_iec559,
-                "_RealType not IEEE 754");
   if (!(0. <= lambda && lambda <= std::numeric_limits<_RealType>::infinity()))
     throw std::range_error("lambda not in [0, infty]");
 }
@@ -30,6 +26,10 @@ template <typename _RealType = double,
 class exponential_distribution {
  public:
   using result_type = _RealType;
+  static_assert(std::is_floating_point<_RealType>::value,
+                "_RealType not floating point number");
+  static_assert(std::numeric_limits<_RealType>::is_iec559,
+                "_RealType not IEEE 754");
 
   class param_type {
    public:

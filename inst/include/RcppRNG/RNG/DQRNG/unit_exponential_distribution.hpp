@@ -11,8 +11,8 @@ namespace distribution {
 template <>
 template <>
 double unit_exponential_distribution<double>::operator()(
-    rng::DQRNG& eng) {
-  return eng.ued(*eng.shared_rng);
+    rng::DQRNG& engine) {
+  return engine.unit_exponential_distribution(*engine.shared_rng);
 }
 
 }  // namespace distribution

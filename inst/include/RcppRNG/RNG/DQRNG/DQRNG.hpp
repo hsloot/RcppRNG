@@ -21,10 +21,10 @@ class DQRNG : public RNG, private misc::ObjectCounter<DQRNG> {
   ~DQRNG();
 
   static dqrng::rng64_t shared_rng;
-  static const dqrng::exponential_distribution ued;
+  static const dqrng::exponential_distribution unit_exponential_distribution;
 };  // DQRNG
 
-const dqrng::exponential_distribution DQRNG::ued{};
+const dqrng::exponential_distribution DQRNG::unit_exponential_distribution{};
 
 }  // namespace rng
 
