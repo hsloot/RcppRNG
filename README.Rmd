@@ -85,21 +85,25 @@ NumericVector Rcpp_rexp_RcppRNG(R_xlen_t n, double rate = 1.) {
 ```
 
 ```{r}
+n <- 1e1L
+lambda <- 0.5
 use_seed <- 1623L
 
 set.seed(use_seed)
-rexp(10, 0.5)
+rexp(n, rate=lambda)
 
 set.seed(use_seed)
-Rcpp_rexp_RNGScope(10, 0.5)
+Rcpp_rexp_RNGScope(n, rate=lambda)
 
 set.seed(use_seed)
-Rcpp_rexp_RcppRNG(10, 0.5)
+Rcpp_rexp_RcppRNG(n, rate=lambda)
 
+
+n <- 1e5L
 bench::mark(
-  rexp(1e5, 0.5),
-  Rcpp_rexp_RNGScope(1e5, 0.5),
-  Rcpp_rexp_RcppRNG(1e5, 0.5),
+  rexp(n, rate=lambda),
+  Rcpp_rexp_RNGScope(n, rate=lambda),
+  Rcpp_rexp_RcppRNG(n, rate=lambda),
   check=FALSE
 )
 ```
@@ -107,23 +111,23 @@ bench::mark(
 
 ## Why is that useful?
 
-For the exponential distribution, the problem is not that easy to motivate,
+For the exponential distribution, obvious to see why this approach constitutes an improvement,
 since whenever one wants repeated single exponential samples inside the C++
 function, one could resort to
 
 ```{Rcpp,eval=FALSE}
-scale * ::exp_rand();
+scale * ::exp_rand(); // in R_ext/Random.h
 ```
 
 However, it is much more difficult, if you need repeated single samples from a
-discrete distribution (e.g. to sample the transitions in a Markov process).
+discrete distribution (e.g. to sample the transitions in a Markov process). 
 At his point you could do somethings like
 
 ```{Rcpp, eval=FALSE}
 sample(n, 1, false, probs, true)[0]; // probs is NumericVector of size n
 ```
 
-This, however, would construct a `NumericVector` object in each draw. This has
+However, this would construct a `NumericVector` object in each draw. This has
 a significant overhead. For the exponential distribution this will be
 demonstrated in the following
 
@@ -151,7 +155,13 @@ bench::mark(
 )
 ```
 
-However, we can also use another random number generator (e.g. the one from `dqrng`):
+Another problem is, that sampling algorithms might perform internal optimizations 
+(in the case of `sample`, probability vectors are sorted), which would have to be 
+repreated every time the function is called with the same parameters. 
+
+Finally, we can also want touse another random number generator (e.g. the one from `dqrng`).
+This is easily possible with our design pattern without having to duplicate the 
+algorithm.
 
 ```{Rcpp}
 #include <Rcpp.h>

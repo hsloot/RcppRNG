@@ -78,44 +78,49 @@ similar in their performance.
       return out;
     }
 
+    n <- 1e1L
+    lambda <- 0.5
     use_seed <- 1623L
 
     set.seed(use_seed)
-    rexp(10, 0.5)
+    rexp(n, rate=lambda)
     #>  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103
     #>  [8] 3.2669849 0.1426958 4.6437262
 
     set.seed(use_seed)
-    Rcpp_rexp_RNGScope(10, 0.5)
+    Rcpp_rexp_RNGScope(n, rate=lambda)
     #>  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103
     #>  [8] 3.2669849 0.1426958 4.6437262
 
     set.seed(use_seed)
-    Rcpp_rexp_RcppRNG(10, 0.5)
+    Rcpp_rexp_RcppRNG(n, rate=lambda)
     #>  [1] 5.4676605 4.5936452 0.4407928 0.5377660 5.1456763 1.4054108 1.6753103
     #>  [8] 3.2669849 0.1426958 4.6437262
 
+
+    n <- 1e5L
     bench::mark(
-      rexp(1e5, 0.5),
-      Rcpp_rexp_RNGScope(1e5, 0.5),
-      Rcpp_rexp_RcppRNG(1e5, 0.5),
+      rexp(n, rate=lambda),
+      Rcpp_rexp_RNGScope(n, rate=lambda),
+      Rcpp_rexp_RcppRNG(n, rate=lambda),
       check=FALSE
     )
     #> # A tibble: 3 x 6
-    #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
-    #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                  5.5ms   6.16ms      155.  783.79KB     2.07
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms    4.5ms      216.    4.52MB     2.08
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.37ms      219.  787.92KB     4.22
+    #>   expression                              min median `itr/sec` mem_alloc
+    #>   <bch:expr>                           <bch:> <bch:>     <dbl> <bch:byt>
+    #> 1 rexp(n, rate = lambda)               5.33ms    6ms      156.  783.79KB
+    #> 2 Rcpp_rexp_RNGScope(n, rate = lambda) 3.83ms 4.33ms      223.    4.52MB
+    #> 3 Rcpp_rexp_RcppRNG(n, rate = lambda)  3.83ms 4.38ms      222.  787.92KB
+    #> # … with 1 more variable: `gc/sec` <dbl>
 
 Why is that useful?
 -------------------
 
-For the exponential distribution, the problem is not that easy to
-motivate, since whenever one wants repeated single exponential samples
-inside the C++ function, one could resort to
+For the exponential distribution, obvious to see why this approach
+constitutes an improvement, since whenever one wants repeated single
+exponential samples inside the C++ function, one could resort to
 
-    scale * ::exp_rand();
+    scale * ::exp_rand(); // in R_ext/Random.h
 
 However, it is much more difficult, if you need repeated single samples
 from a discrete distribution (e.g. to sample the transitions in a Markov
@@ -123,7 +128,7 @@ process). At his point you could do somethings like
 
     sample(n, 1, false, probs, true)[0]; // probs is NumericVector of size n
 
-This, however, would construct a `NumericVector` object in each draw.
+However, this would construct a `NumericVector` object in each draw.
 This has a significant overhead. For the exponential distribution this
 will be demonstrated in the following
 
@@ -149,13 +154,19 @@ will be demonstrated in the following
     #> # A tibble: 4 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.28ms   6.38ms      157.     784KB     2.07
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.42ms      221.     784KB     2.06
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.78ms   4.65ms      205.     784KB     4.22
-    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.59ms   9.13ms      102.     784KB    44.0
+    #> 1 rexp(1e+05, 0.5)                  5.2ms   5.71ms      172.     784KB     2.05
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.83ms   4.48ms      215.     784KB     4.17
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms    4.8ms      207.     784KB     2.07
+    #> 4 Rcpp_rexp_slow(1e+05, 0.5)       7.55ms   8.35ms      113.     784KB    49.3
 
-However, we can also use another random number generator (e.g. the one
-from `dqrng`):
+Another problem is, that sampling algorithms might perform internal
+optimizations (in the case of `sample`, probability vectors are sorted),
+which would have to be repreated every time the function is called with
+the same parameters.
+
+Finally, we can also want touse another random number generator
+(e.g. the one from `dqrng`). This is easily possible with our design
+pattern without having to duplicate the algorithm.
 
     #include <Rcpp.h>
 
@@ -217,11 +228,11 @@ from `dqrng`):
     #> # A tibble: 5 x 6
     #>   expression                          min   median `itr/sec` mem_alloc `gc/sec`
     #>   <bch:expr>                     <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-    #> 1 rexp(1e+05, 0.5)                 5.24ms   6.18ms     161.      784KB     2.07
-    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.46ms     220.      784KB     4.19
-    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.45ms     219.      784KB     4.25
-    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    909.54µs    1.3ms     681.      781KB    11.5 
-    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       8.07ms   9.56ms      92.6     784KB    41.2
+    #> 1 rexp(1e+05, 0.5)                 5.17ms   5.67ms      172.     784KB     2.05
+    #> 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.81ms   4.32ms      215.     784KB     4.22
+    #> 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.81ms   4.27ms      225.     784KB     4.21
+    #> 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    887.39µs   1.23ms      792.     781KB    13.9 
+    #> 5 Rcpp_rexp_slow(1e+05, 0.5)       7.53ms   8.35ms      118.     784KB    49.4
 
 The main benefit of this design is that it allows us to implement new
 sampling algorithms, which are based on basic generators (e.g. exp,

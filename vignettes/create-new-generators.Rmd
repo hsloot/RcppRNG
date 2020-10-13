@@ -89,11 +89,19 @@ class erlang_distribution {
 
   class param_type {
    public:
+
     explicit param_type(const _IntType shape = _IntType{1},
                         const _RealType lambda = _RealType{1.})
         : shape_{shape}, lambda_{lambda} {
       erlang::check_params(shape_, lambda_);
     }
+
+    // Used for construction from a different specialization
+    template <typename _ErlangParamType,
+              class = typename std::enable_if<
+                  !std::is_convertible<_ErlangParamType, param_type>::value>>
+    explicit param_type(const _ErlangParamType& params)
+        : shape_{params.shape()}, lambda_{params.lambda()} {}
 
     // compiler generated ctor and assignment op is sufficient
 
@@ -113,7 +121,7 @@ class erlang_distribution {
   }
 
   explicit erlang_distribution(const param_type& params)
-      : shape_(params.shape()), exponential_distribution_(params.lambda()) {}
+      : shape_{params.shape()}, exponential_distribution_{params.lambda()} {}
 
   // compiler generated ctor and assignment op is sufficient
 

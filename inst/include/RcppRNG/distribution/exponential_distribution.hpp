@@ -6,6 +6,7 @@
 #ifndef RCPPRNG_DISTRIBUTION_EXP_HPP
 #define RCPPRNG_DISTRIBUTION_EXP_HPP
 
+#include <Rcpp.h>
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
@@ -42,8 +43,15 @@ class exponential_distribution {
     using distribution_type = exponential_distribution;
 
     param_type(_RealType lambda = _RealType{1.}) : lambda_{lambda} {
-      exponential::check_params(lambda);
+      exponential::check_params(lambda_);
     }
+
+    // Used for construction from a different specialization
+    template <typename _ExponentialParamType,
+              class = typename std::enable_if<!std::is_convertible<
+                  _ExponentialParamType, param_type>::value>>
+    explicit param_type(const _ExponentialParamType& params)
+        : lambda_{params.lambda()} {}
 
     // compiler generated ctor and assignment op is sufficient
 
