@@ -92,7 +92,14 @@
 <span id="cb1-2"><a href="#cb1-2"></a><span class="co">// [[Rcpp::plugins("cpp14")]]</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="co">// [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="pp">#include </span><span class="im">&lt;RcppRNG.hpp&gt;</span></span></code></pre></div>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="pp">#include </span><span class="im">&lt;RcppRNG.hpp&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="co">// for dqrng functions</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="pp">#include </span><span class="im">&lt;R_randgen.h&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="pp">#include </span><span class="im">&lt;convert_seed.h&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="pp">#include </span><span class="im">&lt;dqrng_generator.h&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="pp">#include </span><span class="im">&lt;dqrng_distribution.h&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="pp">#include </span><span class="im">&lt;xoshiro.h&gt;</span></span></code></pre></div>
 </div>
 <div id="implementation" class="section level2">
 <h2 class="hasAnchor">
@@ -158,7 +165,7 @@
 <span id="cb2-56"><a href="#cb2-56"></a>  <span class="co">// compiler generated ctor and assignment op is sufficient</span></span>
 <span id="cb2-57"><a href="#cb2-57"></a></span>
 <span id="cb2-58"><a href="#cb2-58"></a>  <span class="dt">param_type</span> params() <span class="at">const</span> {</span>
-<span id="cb2-59"><a href="#cb2-59"></a>    <span class="cf">return</span> <span class="dt">param_type</span>(<span class="va">shape_</span>, <span class="va">exponential_distribution_</span>.lambda());</span>
+<span id="cb2-59"><a href="#cb2-59"></a>    <span class="cf">return</span> <span class="dt">param_type</span>{<span class="va">shape_</span>, <span class="va">exponential_distribution_</span>.lambda()};</span>
 <span id="cb2-60"><a href="#cb2-60"></a>  }</span>
 <span id="cb2-61"><a href="#cb2-61"></a></span>
 <span id="cb2-62"><a href="#cb2-62"></a>  <span class="dt">void</span> params(<span class="at">const</span> <span class="dt">param_type</span>&amp; params) {</span>
@@ -172,7 +179,7 @@
 <span id="cb2-70"><a href="#cb2-70"></a></span>
 <span id="cb2-71"><a href="#cb2-71"></a>  <span class="kw">template</span> &lt;<span class="kw">typename</span> _EngineType&gt;</span>
 <span id="cb2-72"><a href="#cb2-72"></a>  <span class="dt">result_type</span> <span class="kw">operator</span>()(_EngineType&amp;&amp; engine) {</span>
-<span id="cb2-73"><a href="#cb2-73"></a>    <span class="dt">result_type</span> out = _RealType(<span class="fl">0.</span>);</span>
+<span id="cb2-73"><a href="#cb2-73"></a>    <span class="dt">result_type</span> out = _RealType{<span class="fl">0.</span>};</span>
 <span id="cb2-74"><a href="#cb2-74"></a>    <span class="cf">for</span> (_IntType j = _IntType(<span class="dv">1</span>); j &lt;= <span class="va">shape_</span>; ++j)</span>
 <span id="cb2-75"><a href="#cb2-75"></a>      out += <span class="va">exponential_distribution_</span>(<span class="bu">std::</span>forward&lt;_EngineType&gt;(engine));</span>
 <span id="cb2-76"><a href="#cb2-76"></a></span>
@@ -215,7 +222,7 @@
 <span id="cb3-10"><a href="#cb3-10"></a><span class="co">//' @export</span></span>
 <span id="cb3-11"><a href="#cb3-11"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
 <span id="cb3-12"><a href="#cb3-12"></a>NumericVector Rcpp_rerlang_RcppRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
-<span id="cb3-13"><a href="#cb3-13"></a>  NumericVector out(no_init(n));</span>
+<span id="cb3-13"><a href="#cb3-13"></a>  NumericVector out{no_init(n)};</span>
 <span id="cb3-14"><a href="#cb3-14"></a>  RcppRNG::rng::RcppRNG engine{};</span>
 <span id="cb3-15"><a href="#cb3-15"></a>  erlang_distribution erlang{shape, rate};</span>
 <span id="cb3-16"><a href="#cb3-16"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(),</span>
@@ -227,7 +234,7 @@
 <span id="cb3-22"><a href="#cb3-22"></a><span class="co">//' @export</span></span>
 <span id="cb3-23"><a href="#cb3-23"></a><span class="co">// [[Rcpp::export(rng=false)]]</span></span>
 <span id="cb3-24"><a href="#cb3-24"></a>NumericVector Rcpp_rerlang_DQRNG(<span class="dt">R_xlen_t</span> n, <span class="dt">int</span> shape = <span class="dv">1</span>, <span class="dt">double</span> rate = <span class="fl">1.</span>) {</span>
-<span id="cb3-25"><a href="#cb3-25"></a>  NumericVector out(no_init(n));</span>
+<span id="cb3-25"><a href="#cb3-25"></a>  NumericVector out{no_init(n)};</span>
 <span id="cb3-26"><a href="#cb3-26"></a>  RcppRNG::rng::DQRNG engine{};</span>
 <span id="cb3-27"><a href="#cb3-27"></a>  erlang_distribution erlang{shape, rate};</span>
 <span id="cb3-28"><a href="#cb3-28"></a>  <span class="bu">std::</span>generate(out.begin(), out.end(),</span>

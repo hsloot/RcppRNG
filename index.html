@@ -148,9 +148,9 @@
 <span id="cb2-60"><a href="#cb2-60"></a><span class="co">#&gt; # A tibble: 3 x 6</span></span>
 <span id="cb2-61"><a href="#cb2-61"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
 <span id="cb2-62"><a href="#cb2-62"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb2-63"><a href="#cb2-63"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 6.87ms    9.2ms      107.  783.79KB     0   </span></span>
-<span id="cb2-64"><a href="#cb2-64"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   4.52ms   6.76ms      140.    4.52MB     2.09</span></span>
-<span id="cb2-65"><a href="#cb2-65"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    4.58ms   6.77ms      144.  787.92KB     2.06</span></span></code></pre></div>
+<span id="cb2-63"><a href="#cb2-63"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.26ms   5.96ms      162.  783.79KB     2.06</span></span>
+<span id="cb2-64"><a href="#cb2-64"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.84ms   4.44ms      219.    4.52MB     2.07</span></span>
+<span id="cb2-65"><a href="#cb2-65"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.33ms      218.  787.92KB     4.27</span></span></code></pre></div>
 </div>
 <div id="why-is-that-useful" class="section level2">
 <h2 class="hasAnchor">
@@ -182,10 +182,10 @@
 <span id="cb5-20"><a href="#cb5-20"></a><span class="co">#&gt; # A tibble: 4 x 6</span></span>
 <span id="cb5-21"><a href="#cb5-21"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
 <span id="cb5-22"><a href="#cb5-22"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 6.76ms   9.35ms     103.      784KB     0   </span></span>
-<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   5.25ms   6.44ms     150.      784KB     2.08</span></span>
-<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    5.45ms   7.52ms     123.      784KB     2.05</span></span>
-<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)      12.92ms  19.02ms      51.0     784KB    22.3</span></span></code></pre></div>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                  5.2ms   5.98ms      161.     784KB     2.07</span></span>
+<span id="cb5-24"><a href="#cb5-24"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.96ms   4.87ms      207.     784KB     2.05</span></span>
+<span id="cb5-25"><a href="#cb5-25"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.83ms   4.82ms      201.     784KB     4.27</span></span>
+<span id="cb5-26"><a href="#cb5-26"></a><span class="co">#&gt; 4 Rcpp_rexp_slow(1e+05, 0.5)       7.64ms   9.19ms      102.     784KB    44.3</span></span></code></pre></div>
 <p>However, we can also use another random number generator (e.g. the one from <code>dqrng</code>):</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#include &lt;Rcpp.h&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a></span>
@@ -247,11 +247,11 @@
 <span id="cb6-58"><a href="#cb6-58"></a><span class="co">#&gt; # A tibble: 5 x 6</span></span>
 <span id="cb6-59"><a href="#cb6-59"></a><span class="co">#&gt;   expression                          min   median `itr/sec` mem_alloc `gc/sec`</span></span>
 <span id="cb6-60"><a href="#cb6-60"></a><span class="co">#&gt;   &lt;bch:expr&gt;                     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;</span></span>
-<span id="cb6-61"><a href="#cb6-61"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 8.57ms   9.59ms     102.      784KB     2.00</span></span>
-<span id="cb6-62"><a href="#cb6-62"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   5.79ms   6.98ms     142.      784KB     2.06</span></span>
-<span id="cb6-63"><a href="#cb6-63"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    5.32ms   7.68ms     127.      784KB     2.09</span></span>
-<span id="cb6-64"><a href="#cb6-64"></a><span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)      1.22ms   2.69ms     349.      781KB     4.39</span></span>
-<span id="cb6-65"><a href="#cb6-65"></a><span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)      14.94ms     19ms      53.4     784KB    22.0</span></span></code></pre></div>
+<span id="cb6-61"><a href="#cb6-61"></a><span class="co">#&gt; 1 rexp(1e+05, 0.5)                 5.34ms   6.75ms      146.     784KB     2.08</span></span>
+<span id="cb6-62"><a href="#cb6-62"></a><span class="co">#&gt; 2 Rcpp_rexp_RNGScope(1e+05, 0.5)   3.82ms   4.64ms      209.     784KB     4.27</span></span>
+<span id="cb6-63"><a href="#cb6-63"></a><span class="co">#&gt; 3 Rcpp_rexp_RcppRNG(1e+05, 0.5)    3.92ms   5.03ms      200.     784KB     2.06</span></span>
+<span id="cb6-64"><a href="#cb6-64"></a><span class="co">#&gt; 4 Rcpp_rexp_DQRNG(1e+05, 0.5)    909.64µs   1.41ms      691.     781KB    13.9 </span></span>
+<span id="cb6-65"><a href="#cb6-65"></a><span class="co">#&gt; 5 Rcpp_rexp_slow(1e+05, 0.5)       7.68ms   9.42ms      103.     784KB    41.7</span></span></code></pre></div>
 <p>The main benefit of this design is that it allows us to implement new sampling algorithms, which are based on basic generators (e.g. exp, unif, …) such that they can be used with the base R RNG or other RNG’s (e.g. dqrng’s). An example is described in a <a href="articles/create-new-generators.html">create new generators</a>.</p>
 </div>
 <div id="license" class="section level2">
