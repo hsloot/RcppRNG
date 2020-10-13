@@ -108,24 +108,24 @@
 <span id="cb2-6"><a href="#cb2-6"></a></span>
 <span id="cb2-7"><a href="#cb2-7"></a><span class="kw">template</span> &lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType&gt;</span>
 <span id="cb2-8"><a href="#cb2-8"></a><span class="dt">void</span> check_params(<span class="at">const</span> _IntType shape, <span class="at">const</span> _RealType lambda) {</span>
-<span id="cb2-9"><a href="#cb2-9"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>is_integral&lt;_IntType&gt;::value,</span>
-<span id="cb2-10"><a href="#cb2-10"></a>                <span class="st">"_IntType not integral type"</span>);</span>
-<span id="cb2-11"><a href="#cb2-11"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>is_floating_point&lt;_RealType&gt;::value,</span>
-<span id="cb2-12"><a href="#cb2-12"></a>                <span class="st">"_RealType not floating point number"</span>);</span>
-<span id="cb2-13"><a href="#cb2-13"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>numeric_limits&lt;_RealType&gt;::is_iec559,</span>
-<span id="cb2-14"><a href="#cb2-14"></a>                <span class="st">"_RealType not IEEE 754"</span>);</span>
-<span id="cb2-15"><a href="#cb2-15"></a>  <span class="cf">if</span> (!(<span class="dv">0</span> &lt; shape)) <span class="cf">throw</span> <span class="bu">std::</span>range_error(<span class="st">"shape not &gt; 0"</span>);</span>
-<span id="cb2-16"><a href="#cb2-16"></a>  <span class="cf">if</span> (!(<span class="fl">0.</span> &lt;= lambda &amp;&amp; lambda &lt;= <span class="bu">std::</span>numeric_limits&lt;_RealType&gt;::infinity()))</span>
-<span id="cb2-17"><a href="#cb2-17"></a>    <span class="cf">throw</span> <span class="bu">std::</span>range_error(<span class="st">"lambda not in [0, infty]"</span>);</span>
-<span id="cb2-18"><a href="#cb2-18"></a>}</span>
-<span id="cb2-19"><a href="#cb2-19"></a></span>
-<span id="cb2-20"><a href="#cb2-20"></a>}  <span class="co">// namespace erlang</span></span>
-<span id="cb2-21"><a href="#cb2-21"></a></span>
-<span id="cb2-22"><a href="#cb2-22"></a><span class="kw">template</span> &lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType,</span>
-<span id="cb2-23"><a href="#cb2-23"></a>          <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
-<span id="cb2-24"><a href="#cb2-24"></a><span class="kw">class</span> erlang_distribution {</span>
-<span id="cb2-25"><a href="#cb2-25"></a> <span class="kw">public</span>:</span>
-<span id="cb2-26"><a href="#cb2-26"></a>  <span class="kw">using</span> <span class="dt">result_type</span> = _RealType;</span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="cf">if</span> (!(<span class="dv">0</span> &lt; shape)) <span class="cf">throw</span> <span class="bu">std::</span>range_error(<span class="st">"shape not &gt; 0"</span>);</span>
+<span id="cb2-10"><a href="#cb2-10"></a>  <span class="cf">if</span> (!(<span class="fl">0.</span> &lt;= lambda &amp;&amp; lambda &lt;= <span class="bu">std::</span>numeric_limits&lt;_RealType&gt;::infinity()))</span>
+<span id="cb2-11"><a href="#cb2-11"></a>    <span class="cf">throw</span> <span class="bu">std::</span>range_error(<span class="st">"lambda not in [0, infty]"</span>);</span>
+<span id="cb2-12"><a href="#cb2-12"></a>}</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a>}  <span class="co">// namespace erlang</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="kw">template</span> &lt;<span class="kw">typename</span> _IntType, <span class="kw">typename</span> _RealType,</span>
+<span id="cb2-17"><a href="#cb2-17"></a>          <span class="kw">typename</span> _ExponentialDistributionType&gt;</span>
+<span id="cb2-18"><a href="#cb2-18"></a><span class="kw">class</span> erlang_distribution {</span>
+<span id="cb2-19"><a href="#cb2-19"></a> <span class="kw">public</span>:</span>
+<span id="cb2-20"><a href="#cb2-20"></a>  <span class="kw">using</span> <span class="dt">result_type</span> = _RealType;</span>
+<span id="cb2-21"><a href="#cb2-21"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>is_integral&lt;_IntType&gt;::value,</span>
+<span id="cb2-22"><a href="#cb2-22"></a>                <span class="st">"_IntType not integral type"</span>);</span>
+<span id="cb2-23"><a href="#cb2-23"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>is_floating_point&lt;_RealType&gt;::value,</span>
+<span id="cb2-24"><a href="#cb2-24"></a>                <span class="st">"_RealType not floating point number"</span>);</span>
+<span id="cb2-25"><a href="#cb2-25"></a>  <span class="kw">static_assert</span>(<span class="bu">std::</span>numeric_limits&lt;_RealType&gt;::is_iec559,</span>
+<span id="cb2-26"><a href="#cb2-26"></a>                <span class="st">"_RealType not IEEE 754"</span>);</span>
 <span id="cb2-27"><a href="#cb2-27"></a></span>
 <span id="cb2-28"><a href="#cb2-28"></a>  <span class="kw">class</span> <span class="dt">param_type</span> {</span>
 <span id="cb2-29"><a href="#cb2-29"></a>   <span class="kw">public</span>:</span>
