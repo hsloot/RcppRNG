@@ -1,7 +1,8 @@
 #ifndef RCPPRNG_RNG_RCPSCOPE_EXP_HPP
 #define RCPPRNG_RNG_RCPSCOPE_EXP_HPP
 
-#include <Rcpp.h>
+#include <Rcpp/RNGScope.h>
+#include <R_ext/Random.h>
 
 #include <RcppRNG/distribution/unit_exponential_distribution.hpp>
 
@@ -13,7 +14,7 @@ template <>
 template <>
 double unit_exponential_distribution<double>::operator()(
     Rcpp::RNGScope& engine) {
-  return R::exp_rand();
+  return ::exp_rand();
 }
 
 }  // namespace distribution

@@ -21,7 +21,7 @@ class unit_exponential_distribution {
   // default ctor's and copy assignment operator are sufficient.
 
   template <typename _EngineType>
-  result_type operator()(_EngineType& eng);
+  result_type operator()(_EngineType& engine);
 };
 
 }  // namespace distribution

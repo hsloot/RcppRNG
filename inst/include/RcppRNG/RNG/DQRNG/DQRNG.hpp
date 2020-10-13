@@ -2,11 +2,9 @@
 #define RCPPRNG_RNG_DQRNG_HPP
 
 #include <R_randgen.h>
-#include <Rcpp.h>
 #include <convert_seed.h>
 #include <dqrng_generator.h>
 #include <dqrng_distribution.h>
-#include <xoshiro.h>
 
 #include <RcppRNG/RNG/RNG.hpp>
 #include <RcppRNG/misc/ObjectCounter.hpp>
@@ -39,7 +37,7 @@ namespace rng {
 DQRNG::DQRNG() {
   if (this->OutstandingObjects() == 1) {
     GetRNGstate();
-    Rcpp::IntegerVector seed(2, dqrng::R_random_int);
+    Rcpp::IntegerVector seed{2, dqrng::R_random_int};
     shared_rng = dqrng::generator(dqrng::convert_seed<uint64_t>(seed));
   }
 }

@@ -1,5 +1,13 @@
 #include <Rcpp.h>
 #include <RcppRNG.hpp>
+
+// for dqrng functions
+#include <R_randgen.h>
+#include <convert_seed.h>
+#include <dqrng_generator.h>
+#include <dqrng_distribution.h>
+#include <xoshiro.h>
+
 using namespace Rcpp;
 
 using unit_exponential_distribution =

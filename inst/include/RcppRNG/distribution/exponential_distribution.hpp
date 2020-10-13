@@ -1,8 +1,14 @@
+/*
+ * While this code code is of our own making, it heavily leans on the design
+ * patterns used in boost/random.
+ */
+
 #ifndef RCPPRNG_DISTRIBUTION_EXP_HPP
 #define RCPPRNG_DISTRIBUTION_EXP_HPP
 
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
 
 #include <RcppRNG/distribution/unit_exponential_distribution.hpp>
 

@@ -45,6 +45,13 @@ packages `RcppRNG` (for obvious reasons) as well as `dqrng`, `BH`, and `sitmo` (
 // [[Rcpp::depends(RcppRNG,dqrng,BH,sitmo)]]
 
 #include <RcppRNG.hpp>
+
+// for dqrng functions
+#include <R_randgen.h>
+#include <convert_seed.h>
+#include <dqrng_generator.h>
+#include <dqrng_distribution.h>
+#include <xoshiro.h>
 ```
 
 
@@ -111,7 +118,7 @@ class erlang_distribution {
   // compiler generated ctor and assignment op is sufficient
 
   param_type params() const {
-    return param_type(shape_, exponential_distribution_.lambda());
+    return param_type{shape_, exponential_distribution_.lambda()};
   }
 
   void params(const param_type& params) {
@@ -125,7 +132,7 @@ class erlang_distribution {
 
   template <typename _EngineType>
   result_type operator()(_EngineType&& engine) {
-    result_type out = _RealType(0.);
+    result_type out = _RealType{0.};
     for (_IntType j = _IntType(1); j <= shape_; ++j)
       out += exponential_distribution_(std::forward<_EngineType>(engine));
 
@@ -170,7 +177,7 @@ using erlang_distribution =
 //' @export
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
-  NumericVector out(no_init(n));
+  NumericVector out{no_init(n)};
   RcppRNG::rng::RcppRNG engine{};
   erlang_distribution erlang{shape, rate};
   std::generate(out.begin(), out.end(),
@@ -182,7 +189,7 @@ NumericVector Rcpp_rerlang_RcppRNG(R_xlen_t n, int shape = 1, double rate = 1.) 
 //' @export
 // [[Rcpp::export(rng=false)]]
 NumericVector Rcpp_rerlang_DQRNG(R_xlen_t n, int shape = 1, double rate = 1.) {
-  NumericVector out(no_init(n));
+  NumericVector out{no_init(n)};
   RcppRNG::rng::DQRNG engine{};
   erlang_distribution erlang{shape, rate};
   std::generate(out.begin(), out.end(),
