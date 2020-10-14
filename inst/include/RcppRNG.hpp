@@ -16,7 +16,7 @@ template <typename _RealType>
 using unit_exponential_distribution =
     distribution::unit_exponential_distribution<_RealType>;
 
-template <typename _RealType, typename _UnitExponentialDistributionType>
+template <typename _RealType, typename _UnitExponentialDistributionType = unit_exponential_distribution<_RealType>>
 using exponential_distribution =
     distribution::exponential_distribution<_RealType,
                                            _UnitExponentialDistributionType>;

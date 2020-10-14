@@ -59,12 +59,15 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP run_testthat_tests();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_RcppRNG_dqset_seed", (DL_FUNC) &_RcppRNG_dqset_seed, 2},
     {"_RcppRNG_dqRNGkind", (DL_FUNC) &_RcppRNG_dqRNGkind, 2},
     {"_RcppRNG_Rcpp_rexp_RNGScope", (DL_FUNC) &_RcppRNG_Rcpp_rexp_RNGScope, 2},
     {"_RcppRNG_Rcpp_rexp_RCPPRNG", (DL_FUNC) &_RcppRNG_Rcpp_rexp_RCPPRNG, 2},
     {"_RcppRNG_Rcpp_rexp_DQRNG", (DL_FUNC) &_RcppRNG_Rcpp_rexp_DQRNG, 2},
+    {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 0},
     {NULL, NULL, 0}
 };
 

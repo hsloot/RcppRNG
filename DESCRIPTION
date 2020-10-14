@@ -24,7 +24,8 @@ LinkingTo:
     Rcpp,
     BH (>= 1.64.0-1),
     sitmo (>= 2.0.0),
-    dqrng
+    dqrng,
+    testthat
 Suggests:
     testthat,
     assertthat,

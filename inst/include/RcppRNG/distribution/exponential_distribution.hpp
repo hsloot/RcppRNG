@@ -1,6 +1,6 @@
 /*
  * While this code code is of our own making, it heavily leans on the design
- * patterns used in boost/random.
+ * patterns used in <random> and boost/random.
  */
 
 #ifndef RCPPRNG_DISTRIBUTION_EXP_HPP
@@ -99,23 +99,6 @@ class exponential_distribution {
   _UnitExponentialDistributionType unit_exponential_distribution_;
 };  // exponential_distribution
 
-template <typename _RealType, typename _UnitExponentialDistributionType>
-bool operator==(
-    const typename exponential_distribution<
-        _RealType, _UnitExponentialDistributionType>::param_type& lhs,
-    const typename exponential_distribution<
-        _RealType, _UnitExponentialDistributionType>::param_type& rhs) {
-  return lhs.isEqual(rhs) && lhs.lambda() == rhs.lambda();
-}
-
-template <typename _RealType, typename _UnitExponentialDistributionType>
-bool operator!=(
-    const typename exponential_distribution<
-        _RealType, _UnitExponentialDistributionType>::param_type& lhs,
-    const typename exponential_distribution<
-        _RealType, _UnitExponentialDistributionType>::param_type& rhs) {
-  return !(lhs == rhs);
-}
 
 template <typename _RealType, typename _UnitExponentialDistributionType>
 bool operator==(
@@ -123,7 +106,7 @@ bool operator==(
         lhs,
     const exponential_distribution<_RealType, _UnitExponentialDistributionType>&
         rhs) {
-  return lhs.isEqual(rhs) && lhs.params() != rhs.params();
+  return lhs.lambda() == rhs.lambda();
 }
 
 template <typename _RealType, typename _UnitExponentialDistributionType>
